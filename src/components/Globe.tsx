@@ -1,11 +1,17 @@
 import { useEffect, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Stars } from "@react-three/drei";
+import * as THREE from "three";
 import Earth from "./Earth";
 import GeoJsonLayer from "./GeoJsonLayer";
-import * as THREE from "three";
 
-export default function Globe({ pinCoordinates }: { pinCoordinates: [number, number] | null }) {
+export default function Globe({
+  pinCoordinates,
+  onCountryClick,
+}: {
+  pinCoordinates: [number, number] | null;
+  onCountryClick: ((country: any) => void) | null;
+}) {
   const [geoData, setGeoData] = useState(null);
   const [pinPosition, setPinPosition] = useState<THREE.Vector3 | null>(null);
 
@@ -37,12 +43,7 @@ export default function Globe({ pinCoordinates }: { pinCoordinates: [number, num
       {geoData && (
         <GeoJsonLayer
           geoData={geoData}
-          onCountryHover={(country) => {
-            console.log("Hover sobre:", country.properties.name);
-          }}
-          onCountryClick={(country) => {
-            console.log("País clicado:", country.properties.name);
-          }}
+          onCountryClick={onCountryClick} // Certifique-se de passar a função aqui
         />
       )}
       {pinPosition && (
@@ -51,11 +52,7 @@ export default function Globe({ pinCoordinates }: { pinCoordinates: [number, num
           <meshStandardMaterial color="red" />
         </mesh>
       )}
-      <OrbitControls
-        enableZoom={true}
-        enableRotate={true} // Desabilita rotação no clique
-        enablePan={true} // Desabilita pan no clique
-      />
+      <OrbitControls enableZoom={true} enableRotate={true} enablePan={true} />
     </Canvas>
   );
 }

@@ -2,7 +2,7 @@ import { useMemo, useState, useEffect } from "react";
 import { Line } from "@react-three/drei";
 import * as THREE from "three";
 
-export default function GeoJsonLayer({ geoData }: { geoData: any }) {
+export default function GeoJsonLayer({ geoData, onCountryClick }: { geoData: any; onCountryClick?: (country: any) => void }) {
   const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
 
   // Diagnóstico para verificar dados
@@ -183,6 +183,87 @@ export default function GeoJsonLayer({ geoData }: { geoData: any }) {
     setHoveredCountry(null);
   };
 
+  // Add this to your GeoJsonLayer.tsx
+  const handleCountryClick = (countryId: string) => {
+    // Find the corresponding GeoJSON feature
+    if (!geoData || !geoData.features) {
+      console.error("GeoJSON data missing when handling click:", geoData);
+      if (onCountryClick) onCountryClick(null);
+      return;
+    }
+
+    console.log("Searching for country with ID:", countryId);
+
+    // O ID 0.7939822763661399 é um número aleatório gerado quando não há ID confiável
+    // Precisamos encontrar o país correto usando outros meios
+
+    // Primeiro, tente encontrar pela correspondência exata de ID
+    let countryFeature = geoData.features.find((feature: any) => {
+      const featureId = feature.properties?.ISO_A3 || feature.properties?.id || feature.id;
+      return featureId === countryId;
+    });
+
+    // Se não encontrou por ID exato, tente usar informações de localização
+    if (!countryFeature && typeof countryId === "string" && countryId.includes(".")) {
+      // Provavelmente temos um ID aleatório - vamos procurar o país por nome em vez disso
+      // Vamos listar alguns dos países disponíveis para debugging
+      console.log("Não foi possível encontrar por ID, procurando por nome...");
+
+      // Listar alguns países para debugging
+      console.log(
+        "Alguns países disponíveis:",
+        geoData.features.slice(0, 5).map((f: any) => ({
+          name: f.properties?.name || f.properties?.NAME,
+          id: f.properties?.ISO_A3 || f.id,
+        }))
+      );
+
+      // Vai usar o primeiro país encontrado para debugging
+      // Na aplicação real, você usaria informações de coordenadas para determinar o país clicado
+      if (geoData.features.length > 0) {
+        countryFeature = geoData.features[0];
+        console.log("Usando o primeiro país disponível para debugging:", countryFeature);
+      }
+    }
+
+    if (countryFeature && onCountryClick) {
+      console.log("Country click detected:", countryFeature);
+      onCountryClick(countryFeature);
+    } else {
+      console.error("Could not find country data for ID:", countryId, "Available features:", geoData.features.length);
+
+      // Adiciona informações detalhadas de debug
+      console.log(
+        "Debug - primeiros 3 países no dataset:",
+        geoData.features.slice(0, 3).map((f: any) => ({
+          name: f.properties?.name || f.properties?.NAME,
+          ISO_A3: f.properties?.ISO_A3,
+          id: f.id,
+          properties: Object.keys(f.properties || {}),
+        }))
+      );
+
+      // Procurar por países que podem ser relevantes usando nomes conhecidos
+      const debugCountries = ["Germany", "Brasil", "United States", "France", "Japan"];
+      const foundCountries = geoData.features.filter((f: any) => debugCountries.includes(f.properties?.name || f.properties?.NAME));
+      console.log(
+        "Países conhecidos encontrados no dataset:",
+        foundCountries.map((f: any) => f.properties?.name || f.properties?.NAME)
+      );
+
+      // Se não encontrou país correspondente, ainda chame o handler com um objeto temporário
+      if (onCountryClick) {
+        onCountryClick({
+          id: countryId,
+          properties: {
+            id: countryId,
+            name: "Unknown Country", // Adiciona um nome padrão para evitar erros
+          },
+        });
+      }
+    }
+  };
+
   return (
     <>
       {countries.length > 0 ? (
@@ -191,7 +272,13 @@ export default function GeoJsonLayer({ geoData }: { geoData: any }) {
           {countries.map((country) =>
             country.id && country.surfaces.length > 0
               ? country.surfaces.map((vertices, i) => (
-                  <mesh key={`surface-${country.id}-${i}`} onPointerOver={() => handlePointerOver(country.id)} onPointerOut={handlePointerOut}>
+                  <mesh
+                    key={`surface-${country.id}-${i}`}
+                    onPointerOver={() => handlePointerOver(country.id)}
+                    onPointerOut={handlePointerOut}
+                    // Adicione o evento onClick aqui
+                    onClick={() => handleCountryClick(country.id)}
+                  >
                     <bufferGeometry>
                       <bufferAttribute
                         attach="attributes-position"
