@@ -1,16 +1,15 @@
-import { useState } from "react";
 import Globe from "./components/Globe";
+import Questions from "./components/Questions";
 
 function App() {
-  const [count, setCount] = useState(0);
+  // Exemplo de país com código ISO 3166-1 alpha-2
+  const countryName = "Brasil";
+  const countryCode = "br"; // Código do país em minúsculas (ISO 3166-1 alpha-2)
+  const flagUrl = `https://flagcdn.com/w320/${countryCode}.png`;
 
   return (
     <>
-      <div>
-        <h1>Welcome to the 3D Globe App</h1>
-        <p>This is a simple app to demonstrate a 3D globe using React and Three.js.</p>
-        <button onClick={() => setCount(count + 1)}>Count is: {count}</button>
-      </div>
+      <Questions flagUrl={flagUrl} countryName={countryName} />
       <Globe />
     </>
   );
