@@ -2,17 +2,38 @@ import Globe from "./components/Globe";
 import Questions from "./components/Questions";
 
 function App() {
-  // Exemplo de país com código ISO 3166-1 alpha-2
-  const countryName = "Brasil";
-  const countryCode = "br"; // Código do país em minúsculas (ISO 3166-1 alpha-2)
-  const flagUrl = `https://flagcdn.com/w320/${countryCode}.png`;
-
   return (
-    <>
-      <Questions flagUrl={flagUrl} countryName={countryName} />
-      <Globe />
-    </>
+    <div style={styles.container}>
+      <div style={styles.leftPanel}>
+        <Questions />
+      </div>
+      <div style={styles.rightPanel}>
+        <Globe />
+      </div>
+    </div>
   );
 }
+
+const styles = {
+  container: {
+    display: "flex",
+    flexDirection: "row" as const,
+    height: "100vh",
+    width: "100vw",
+  },
+  leftPanel: {
+    flex: 1,
+    backgroundColor: "#f4f4f4",
+    padding: "20px",
+    overflowY: "auto" as const,
+  },
+  rightPanel: {
+    flex: 2,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#000",
+  },
+};
 
 export default App;
