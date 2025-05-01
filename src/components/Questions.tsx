@@ -19,6 +19,7 @@ export default function Questions({ onPin }: { onPin: (coordinates: [number, num
   const [options, setOptions] = useState<Country[]>([]);
   const [correctCount, setCorrectCount] = useState(0);
   const [wrongCount, setWrongCount] = useState(0);
+  const [clickedCountry, setClickedCountry] = useState<string | null>(null);
 
   useEffect(() => {
     generateQuestion();
@@ -32,16 +33,15 @@ export default function Questions({ onPin }: { onPin: (coordinates: [number, num
   };
 
   const handleAnswer = (selectedCountry: Country) => {
+    setClickedCountry(selectedCountry.name); // Atualiza o país clicado
     if (selectedCountry.name === correctCountry?.name) {
       setCorrectCount(correctCount + 1);
     } else {
       setWrongCount(wrongCount + 1);
     }
-    // Passa as coordenadas do país correto para o globo
     if (correctCountry) {
       onPin(correctCountry.coordinates);
     }
-
     generateQuestion(); // Gera uma nova pergunta
   };
 
@@ -61,6 +61,10 @@ export default function Questions({ onPin }: { onPin: (coordinates: [number, num
           <div style={styles.score}>
             <p>Corretas: {correctCount}</p>
             <p>Erradas: {wrongCount}</p>
+          </div>
+          <div style={styles.clickedCountry}>
+            <h3>País Selecionado:</h3>
+            <p>{clickedCountry || "Nenhum país selecionado"}</p>
           </div>
         </>
       )}
@@ -108,6 +112,11 @@ const styles = {
     transition: "background-color 0.3s, color 0.3s",
   },
   score: {
+    marginTop: "20px",
+    fontSize: "16px",
+    color: "#333",
+  },
+  clickedCountry: {
     marginTop: "20px",
     fontSize: "16px",
     color: "#333",
