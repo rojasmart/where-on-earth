@@ -7,7 +7,7 @@ export default function Earth() {
 
   return (
     <mesh>
-      <sphereGeometry args={[1, 64, 64]} />
+      <sphereGeometry args={[2, 64, 64]} />
       <meshStandardMaterial map={earthMap} />
     </mesh>
   );
