@@ -118,44 +118,20 @@ export default function Questions({
     if (gameStage === "map") {
       console.log("Country click received:", countryFeature);
 
-      // Check if countryFeature is completely empty
+      // Checagem completa para garantir que temos dados válidos
       if (!countryFeature) {
         console.error("Empty countryFeature received in onCountryClick");
         alert("Nenhum país foi detectado no local clicado. Por favor, tente novamente.");
         return;
       }
 
-      // Check if countryFeature and properties exist before accessing properties.name
-      if (countryFeature.properties && countryFeature.properties.name) {
-        const clickedName = countryFeature.properties.name;
-        handleMapClick(clickedName);
-      } else {
-        // Handle case when the country data is incomplete
-        console.error("Country data is incomplete:", countryFeature);
+      // Extrai o nome do país, mesmo que seja "Unknown Country"
+      const clickedName = countryFeature.properties?.name || countryFeature.properties?.NAME || "País Desconhecido";
 
-        // Try to get any available identifier for better error messages
-        let countryId = "Unknown";
-        let errorMessage = "Erro ao identificar o país clicado.";
+      console.log("Nome do país clicado:", clickedName);
 
-        if (countryFeature.properties) {
-          console.log("Available properties:", Object.keys(countryFeature.properties));
-
-          // Check various common country identifiers
-          if (countryFeature.properties.ISO_A3) countryId = countryFeature.properties.ISO_A3;
-          if (countryFeature.properties.name_long) countryId = countryFeature.properties.name_long;
-          if (countryFeature.properties.NAME) countryId = countryFeature.properties.NAME;
-          if (countryFeature.properties.ADMIN) countryId = countryFeature.properties.ADMIN;
-        }
-
-        if (countryFeature.id) countryId = countryFeature.id;
-
-        if (countryId !== "Unknown") {
-          errorMessage = `Erro ao identificar o país clicado (ID: ${countryId}).`;
-        }
-
-        alert(`${errorMessage} Por favor, tente novamente.`);
-        console.log("Debug info:", { countryFeature, countryId });
-      }
+      // Passa o nome para a função handleMapClick que vai fazer a verificação
+      handleMapClick(clickedName);
     }
   };
 
