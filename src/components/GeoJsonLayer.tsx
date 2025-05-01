@@ -10,11 +10,11 @@ export default function GeoJsonLayer({ geoData }: { geoData: any }) {
       if (feature.geometry.type === "Polygon") {
         return coordinates.map((ring: any) =>
           ring.map(([lon, lat]: [number, number]) => {
-            const phi = (90 - lat) * (Math.PI / 180); // Latitude invertida
-            const theta = (lon + 180) * (Math.PI / 180);
-            const x = 2 * Math.sin(phi) * Math.cos(theta);
-            const y = 2 * Math.cos(phi);
-            const z = 2 * Math.sin(phi) * Math.sin(theta);
+            const phi = lat * (Math.PI / 180); // Latitude em radianos
+            const theta = -lon * (Math.PI / 180); // Longitude invertida para alinhar corretamente
+            const x = 2 * Math.cos(phi) * Math.cos(theta);
+            const y = 2 * Math.sin(phi);
+            const z = 2 * Math.cos(phi) * Math.sin(theta);
             return new THREE.Vector3(x, y, z);
           })
         );
@@ -22,11 +22,11 @@ export default function GeoJsonLayer({ geoData }: { geoData: any }) {
         return coordinates.flatMap((polygon: any) =>
           polygon.map((ring: any) =>
             ring.map(([lon, lat]: [number, number]) => {
-              const phi = (90 - lat) * (Math.PI / 180); // Latitude invertida
-              const theta = (lon + 180) * (Math.PI / 180);
-              const x = 2 * Math.sin(phi) * Math.cos(theta);
-              const y = 2 * Math.cos(phi);
-              const z = 2 * Math.sin(phi) * Math.sin(theta);
+              const phi = lat * (Math.PI / 180); // Latitude em radianos
+              const theta = -lon * (Math.PI / 180); // Longitude invertida para alinhar corretamente
+              const x = 2 * Math.cos(phi) * Math.cos(theta);
+              const y = 2 * Math.sin(phi);
+              const z = 2 * Math.cos(phi) * Math.sin(theta);
               return new THREE.Vector3(x, y, z);
             })
           )
