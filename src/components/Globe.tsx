@@ -16,7 +16,7 @@ export default function Globe() {
 
   return (
     <Canvas style={{ width: "50vw", height: "50vh" }} camera={{ position: [0, 0, 5], fov: 45 }}>
-      <ambientLight intensity={1} />
+      <ambientLight intensity={4} />
       <directionalLight position={[5, 5, 5]} />
       <Stars />
       <Earth />

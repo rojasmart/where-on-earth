@@ -84,6 +84,7 @@ const styles = {
     fontSize: "18px",
     fontWeight: "bold" as const,
     marginBottom: "20px",
+    color: "#333",
   },
   options: {
     display: "flex",
@@ -97,9 +98,12 @@ const styles = {
     border: "1px solid #ccc",
     borderRadius: "5px",
     backgroundColor: "#fff",
+    color: "#333",
+    transition: "background-color 0.3s, color 0.3s",
   },
   score: {
     marginTop: "20px",
     fontSize: "16px",
+    color: "#333",
   },
 };
