@@ -1,14 +1,17 @@
+import { useState } from "react";
 import Globe from "./components/Globe";
 import Questions from "./components/Questions";
 
 function App() {
+  const [pinCoordinates, setPinCoordinates] = useState<[number, number] | null>(null);
+
   return (
     <div style={styles.container}>
       <div style={styles.leftPanel}>
-        <Questions />
+        <Questions onPin={setPinCoordinates} />
       </div>
       <div style={styles.rightPanel}>
-        <Globe />
+        <Globe pinCoordinates={pinCoordinates} />
       </div>
     </div>
   );

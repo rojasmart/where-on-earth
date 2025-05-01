@@ -3,17 +3,18 @@ import React, { useState, useEffect } from "react";
 interface Country {
   name: string;
   code: string;
+  coordinates: [number, number]; // [longitude, latitude]
 }
 
 const countries: Country[] = [
-  { name: "Brasil", code: "br" },
-  { name: "Estados Unidos", code: "us" },
-  { name: "França", code: "fr" },
-  { name: "Alemanha", code: "de" },
-  { name: "Japão", code: "jp" },
+  { name: "Brasil", code: "br", coordinates: [-51.9253, -14.235] },
+  { name: "Estados Unidos", code: "us", coordinates: [-95.7129, 37.0902] },
+  { name: "França", code: "fr", coordinates: [2.2137, 46.2276] },
+  { name: "Alemanha", code: "de", coordinates: [10.4515, 51.1657] },
+  { name: "Japão", code: "jp", coordinates: [138.2529, 36.2048] },
 ];
 
-export default function Questions() {
+export default function Questions({ onPin }: { onPin: (coordinates: [number, number]) => void }) {
   const [correctCountry, setCorrectCountry] = useState<Country | null>(null);
   const [options, setOptions] = useState<Country[]>([]);
   const [correctCount, setCorrectCount] = useState(0);
@@ -36,6 +37,11 @@ export default function Questions() {
     } else {
       setWrongCount(wrongCount + 1);
     }
+    // Passa as coordenadas do país correto para o globo
+    if (correctCountry) {
+      onPin(correctCountry.coordinates);
+    }
+
     generateQuestion(); // Gera uma nova pergunta
   };
 
@@ -44,7 +50,7 @@ export default function Questions() {
       {correctCountry && (
         <>
           <img src={`https://flagcdn.com/w320/${correctCountry.code}.png`} alt={`Bandeira de ${correctCountry.name}`} style={styles.flag} />
-          <p style={styles.question}>Qual país pertence a esta bandeira?</p>
+          <p style={styles.question}>Que país pertence a esta bandeira?</p>
           <div style={styles.options}>
             {options.map((country) => (
               <button key={country.code} onClick={() => handleAnswer(country)} style={styles.optionButton}>
