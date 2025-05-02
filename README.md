@@ -1,4 +1,4 @@
-Collecting workspace information# Where On Earth
+![image](https://github.com/user-attachments/assets/a664f263-fc95-4fbe-b7dc-850c3fd5a801)
 
 A geography quiz application that uses a 3D globe to challenge users with geography-based questions about countries and locations around the world.
 
