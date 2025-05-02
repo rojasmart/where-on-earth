@@ -28,7 +28,15 @@ export default function GeoJsonLayer({ geoData, onCountryClick }: { geoData: any
       return [];
     }
 
-    const mappedCountries = geoData.features.map((feature: any) => {
+    // Primeiro, filtra features inválidas
+    const validFeatures = geoData.features.filter((feature) => feature && feature.geometry && feature.geometry.coordinates);
+
+    // Log único de resumo em vez de múltiplos avisos
+    if (validFeatures.length < geoData.features.length) {
+      console.warn(`Filtered out ${geoData.features.length - validFeatures.length} invalid features from GeoJSON`);
+    }
+
+    const mappedCountries = geoData.features.map((feature: any, index: number) => {
       // Guard against missing or malformed geometry
       if (!feature || !feature.geometry || !feature.geometry.coordinates) {
         console.warn("Invalid feature found in GeoJSON data", feature);

@@ -17,32 +17,35 @@ const countries: Country[] = [
 
 // Função para normalizar nomes de países
 const normalizeCountryName = (name: string): string => {
+  // Converte para minúsculas para comparação case-insensitive
+  const lowerName = name.toLowerCase();
+
   // Map de nomes em inglês para nomes em português
   const countryNameMap: Record<string, string> = {
-    // Inglês -> Português
-    Brazil: "Brasil",
-    "United States": "Estados Unidos",
-    "United States of America": "Estados Unidos",
-    USA: "Estados Unidos",
-    France: "França",
-    Germany: "Alemanha",
-    Japan: "Japão",
+    // Inglês -> Português (versões lowercase)
+    brazil: "Brasil",
+    "united states": "Estados Unidos",
+    "united states of america": "Estados Unidos",
+    usa: "Estados Unidos",
+    us: "Estados Unidos",
+    "u.s.a.": "Estados Unidos",
+    france: "França",
+    germany: "Alemanha",
+    japan: "Japão",
 
     // Variações comuns
-    US: "Estados Unidos",
-    "U.S.A.": "Estados Unidos",
-    Brasilien: "Brasil",
-    Brésil: "Brasil",
-    Allemagne: "Alemanha",
-    Alemania: "Alemanha",
-    Francia: "França",
-    Frankreich: "França",
-    Japon: "Japão",
-    Japón: "Japão",
+    brasilien: "Brasil",
+    brésil: "Brasil",
+    allemagne: "Alemanha",
+    alemania: "Alemanha",
+    francia: "França",
+    frankreich: "França",
+    japon: "Japão",
+    japón: "Japão",
   };
 
-  // Tenta encontrar o nome normalizado no mapa
-  return countryNameMap[name] || name;
+  // Tenta encontrar o nome normalizado no mapa (case insensitive)
+  return countryNameMap[lowerName] || name;
 };
 
 export default function Questions({
@@ -99,6 +102,14 @@ export default function Questions({
       // Normaliza o nome do país clicado para comparar com nosso padrão
       const normalizedClickedName = normalizeCountryName(countryName);
 
+      // Log detalhado para depuração
+      console.log("Comparando:", {
+        original: countryName,
+        normalizado: normalizedClickedName,
+        correto: correctCountry.name,
+        match: normalizedClickedName === correctCountry.name,
+      });
+
       if (normalizedClickedName === correctCountry.name) {
         // Identificação correta no mapa
         setCorrectCount(correctCount + 1);
@@ -106,14 +117,18 @@ export default function Questions({
       } else {
         // Identificação incorreta no mapa
         setWrongCount(wrongCount + 1);
-        alert(`Incorreto! Você clicou em ${countryName} (${normalizedClickedName}), mas a resposta correta é ${correctCountry.name}.`);
+        alert(`Incorreto! Você clicou em ${countryName} (normalizado: ${normalizedClickedName}), mas a resposta correta é ${correctCountry.name}.`);
       }
-      generateQuestion(); // Avança para a próxima questão
+
+      // Gera nova pergunta independentemente do resultado
+      generateQuestion();
     }
   };
 
   // Add this function to your component to be passed to App.tsx
   // and then to GeoJsonLayer.tsx
+  // Em Questions.tsx, modifique a função onCountryClick:
+
   const onCountryClick = (countryFeature: any) => {
     if (gameStage === "map") {
       console.log("Country click received:", countryFeature);
@@ -128,7 +143,18 @@ export default function Questions({
       // Extrai o nome do país, mesmo que seja "Unknown Country"
       const clickedName = countryFeature.properties?.name || countryFeature.properties?.NAME || "País Desconhecido";
 
-      console.log("Nome do país clicado:", clickedName);
+      // Log detalhado para depuração
+      console.log("Nome do país clicado (original):", clickedName);
+      console.log("Nome do país correto:", correctCountry?.name);
+
+      const normalizedName = normalizeCountryName(clickedName);
+      console.log("Nome do país clicado (normalizado):", normalizedName);
+      console.log("São iguais?", normalizedName === correctCountry?.name);
+
+      // Exibe todos os valores possíveis de nome
+      if (countryFeature.properties) {
+        console.log("Todas propriedades do país clicado:", countryFeature.properties);
+      }
 
       // Passa o nome para a função handleMapClick que vai fazer a verificação
       handleMapClick(clickedName);
