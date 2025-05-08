@@ -4,6 +4,7 @@ import * as THREE from "three";
 
 export default function GeoJsonLayer({ geoData, onCountryClick }: { geoData: any; onCountryClick?: (country: any) => void }) {
   const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
+  const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
 
   // Diagnóstico para verificar dados
   useEffect(() => {
@@ -191,10 +192,9 @@ export default function GeoJsonLayer({ geoData, onCountryClick }: { geoData: any
     setHoveredCountry(null);
   };
 
-  // Add this to your GeoJsonLayer.tsx
-  // Add this to your GeoJsonLayer.tsx
-  // Substitua toda a função handleCountryClick por esta versão melhorada
   const handleCountryClick = (countryId: string) => {
+    setSelectedCountry(countryId);
+
     // Find the corresponding GeoJSON feature
     if (!geoData || !geoData.features) {
       console.error("GeoJSON data missing when handling click:", geoData);
@@ -400,8 +400,8 @@ export default function GeoJsonLayer({ geoData, onCountryClick }: { geoData: any
                     key={`surface-${country.id}-${i}`}
                     onPointerOver={() => handlePointerOver(country.id)}
                     onPointerOut={handlePointerOut}
-                    // Adicione o evento onClick aqui
                     onClick={() => handleCountryClick(country.id)}
+                    renderOrder={selectedCountry === country.id ? 1 : 0}
                   >
                     <bufferGeometry>
                       <bufferAttribute
@@ -421,7 +421,13 @@ export default function GeoJsonLayer({ geoData, onCountryClick }: { geoData: any
           {countries.map((country) =>
             country.id && country.lines.length > 0
               ? country.lines.map((points, i) => (
-                  <Line key={`line-${country.id}-${i}`} points={points} color={hoveredCountry === country.id ? "red" : "white"} lineWidth={2} />
+                  <Line
+                    key={`line-${country.id}-${i}`}
+                    points={points}
+                    color={selectedCountry === country.id ? "red" : hoveredCountry === country.id ? "#ff8888" : "white"}
+                    lineWidth={selectedCountry === country.id ? 3 : hoveredCountry === country.id ? 2 : 1}
+                    renderOrder={selectedCountry === country.id ? 2 : 1}
+                  />
                 ))
               : null
           )}
