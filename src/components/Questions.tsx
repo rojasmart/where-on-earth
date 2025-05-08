@@ -17,35 +17,51 @@ const countries: Country[] = [
 
 // Função para normalizar nomes de países
 const normalizeCountryName = (name: string): string => {
-  // Converte para minúsculas para comparação case-insensitive
-  const lowerName = name.toLowerCase();
+  if (!name) return "";
 
-  // Map de nomes em inglês para nomes em português
+  // Remove acentos e converte para minúsculas
+  const normalized = name
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+
+  // Mapa expandido de nomes de países
   const countryNameMap: Record<string, string> = {
-    // Inglês -> Português (versões lowercase)
-    brazil: "Brasil",
-    "united states": "Estados Unidos",
-    "united states of america": "Estados Unidos",
-    usa: "Estados Unidos",
-    us: "Estados Unidos",
-    "u.s.a.": "Estados Unidos",
-    france: "França",
-    germany: "Alemanha",
-    japan: "Japão",
+    // Brasil
+    brazil: "brasil",
+    brasil: "brasil",
+    brasilien: "brasil",
+    bresil: "brasil",
 
-    // Variações comuns
-    brasilien: "Brasil",
-    brésil: "Brasil",
-    allemagne: "Alemanha",
-    alemania: "Alemanha",
-    francia: "França",
-    frankreich: "França",
-    japon: "Japão",
-    japón: "Japão",
+    // Estados Unidos
+    "united states": "estados unidos",
+    "united states of america": "estados unidos",
+    usa: "estados unidos",
+    us: "estados unidos",
+    "u.s.a": "estados unidos",
+    "estados unidos": "estados unidos",
+    "estados unidos da america": "estados unidos",
+
+    // França
+    france: "franca",
+    francia: "franca",
+    frankreich: "franca",
+    franca: "franca",
+
+    // Alemanha
+    germany: "alemanha",
+    allemagne: "alemanha",
+    alemania: "alemanha",
+    alemanha: "alemanha",
+
+    // Japão
+    japan: "japao",
+    japon: "japao",
+    japao: "japao",
   };
 
-  // Tenta encontrar o nome normalizado no mapa (case insensitive)
-  return countryNameMap[lowerName] || name;
+  return countryNameMap[normalized] || normalized;
 };
 
 export default function Questions({
@@ -131,32 +147,21 @@ export default function Questions({
 
   const onCountryClick = (countryFeature: any) => {
     if (gameStage === "map") {
-      console.log("Country click received:", countryFeature);
-
-      // Checagem completa para garantir que temos dados válidos
-      if (!countryFeature) {
-        console.error("Empty countryFeature received in onCountryClick");
-        alert("Nenhum país foi detectado no local clicado. Por favor, tente novamente.");
+      if (!countryFeature || !countryFeature.properties) {
+        console.error("Dados do país inválidos");
         return;
       }
 
-      // Extrai o nome do país, mesmo que seja "Unknown Country"
-      const clickedName = countryFeature.properties?.name || countryFeature.properties?.NAME || "País Desconhecido";
+      // Tenta obter o nome do país de várias propriedades possíveis
+      const clickedName =
+        countryFeature.properties.ADMIN ||
+        countryFeature.properties.NAME ||
+        countryFeature.properties.name ||
+        countryFeature.properties.NAME_PT ||
+        countryFeature.properties.NAME_LONG ||
+        "País Desconhecido";
 
-      // Log detalhado para depuração
-      console.log("Nome do país clicado (original):", clickedName);
-      console.log("Nome do país correto:", correctCountry?.name);
-
-      const normalizedName = normalizeCountryName(clickedName);
-      console.log("Nome do país clicado (normalizado):", normalizedName);
-      console.log("São iguais?", normalizedName === correctCountry?.name);
-
-      // Exibe todos os valores possíveis de nome
-      if (countryFeature.properties) {
-        console.log("Todas propriedades do país clicado:", countryFeature.properties);
-      }
-
-      // Passa o nome para a função handleMapClick que vai fazer a verificação
+      console.log("Propriedades do país:", countryFeature.properties);
       handleMapClick(clickedName);
     }
   };
