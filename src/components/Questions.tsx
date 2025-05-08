@@ -33,6 +33,8 @@ const normalizeCountryName = (name: string): string => {
     brasil: "brasil",
     brasilien: "brasil",
     bresil: "brasil",
+    "federative republic of brazil": "brasil",
+    "brazil (federative republic of)": "brasil",
 
     // Estados Unidos
     "united states": "estados unidos",
@@ -115,29 +117,29 @@ export default function Questions({
 
   const handleMapClick = (countryName: string) => {
     if (gameStage === "map" && correctCountry) {
-      // Normaliza o nome do país clicado para comparar com nosso padrão
+      // Normaliza ambos os nomes
       const normalizedClickedName = normalizeCountryName(countryName);
+      const normalizedCorrectName = normalizeCountryName(correctCountry.name);
 
-      // Log detalhado para depuração
-      console.log("Comparando:", {
-        original: countryName,
-        normalizado: normalizedClickedName,
-        correto: correctCountry.name,
-        match: normalizedClickedName === correctCountry.name,
+      // Log detalhado para debug
+      console.log("Comparação de países:", {
+        clickedOriginal: countryName,
+        clickedNormalized: normalizedClickedName,
+        correctOriginal: correctCountry.name,
+        correctNormalized: normalizedCorrectName,
+        isMatch: normalizedClickedName === normalizedCorrectName,
       });
 
-      if (normalizedClickedName === correctCountry.name) {
-        // Identificação correta no mapa
+      // Verifica se os nomes normalizados são iguais
+      if (normalizedClickedName === normalizedCorrectName) {
         setCorrectCount(correctCount + 1);
         alert(`Parabéns! Você acertou a localização de ${correctCountry.name}!`);
+        generateQuestion(); // Move para próxima questão
       } else {
-        // Identificação incorreta no mapa
         setWrongCount(wrongCount + 1);
-        alert(`Incorreto! Você clicou em ${countryName} (normalizado: ${normalizedClickedName}), mas a resposta correta é ${correctCountry.name}.`);
+        alert(`Incorreto! Você clicou em ${countryName}, mas a resposta correta é ${correctCountry.name}.`);
+        generateQuestion(); // Move para próxima questão mesmo em caso de erro
       }
-
-      // Gera nova pergunta independentemente do resultado
-      generateQuestion();
     }
   };
 
@@ -154,14 +156,18 @@ export default function Questions({
 
       // Tenta obter o nome do país de várias propriedades possíveis
       const clickedName =
+        countryFeature.properties.NAME_PT || // Tenta primeiro o nome em português
         countryFeature.properties.ADMIN ||
         countryFeature.properties.NAME ||
         countryFeature.properties.name ||
-        countryFeature.properties.NAME_PT ||
         countryFeature.properties.NAME_LONG ||
         "País Desconhecido";
 
-      console.log("Propriedades do país:", countryFeature.properties);
+      console.log("Clique no país:", {
+        propriedades: countryFeature.properties,
+        nomeUsado: clickedName,
+      });
+
       handleMapClick(clickedName);
     }
   };
