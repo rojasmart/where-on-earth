@@ -19,48 +19,46 @@ const countries: Country[] = [
 const normalizeCountryName = (name: string): string => {
   if (!name) return "";
 
-  // Remove acentos e converte para minúsculas
+  // Remove acentos, converte para minúsculas e remove espaços extras
   const normalized = name
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .trim();
 
-  // Mapa expandido de nomes de países
+  // Mapeamento expandido de nomes de países
   const countryNameMap: Record<string, string> = {
     // Brasil
     brazil: "brasil",
     brasil: "brasil",
+    bra: "brasil",
     brasilien: "brasil",
     bresil: "brasil",
     "federative republic of brazil": "brasil",
-    "brazil (federative republic of)": "brasil",
 
     // Estados Unidos
     "united states": "estados unidos",
     "united states of america": "estados unidos",
     usa: "estados unidos",
     us: "estados unidos",
-    "u.s.a": "estados unidos",
-    "estados unidos": "estados unidos",
-    "estados unidos da america": "estados unidos",
+    "united states": "estados unidos",
 
     // França
     france: "franca",
+    fra: "franca",
     francia: "franca",
     frankreich: "franca",
-    franca: "franca",
 
     // Alemanha
     germany: "alemanha",
+    deu: "alemanha",
+    deutschland: "alemanha",
     allemagne: "alemanha",
-    alemania: "alemanha",
-    alemanha: "alemanha",
 
     // Japão
     japan: "japao",
+    jpn: "japao",
     japon: "japao",
-    japao: "japao",
   };
 
   return countryNameMap[normalized] || normalized;
@@ -117,28 +115,42 @@ export default function Questions({
 
   const handleMapClick = (countryName: string) => {
     if (gameStage === "map" && correctCountry) {
-      // Normaliza ambos os nomes
+      // Remove acentos e converte para minúsculas para comparação
       const normalizedClickedName = normalizeCountryName(countryName);
       const normalizedCorrectName = normalizeCountryName(correctCountry.name);
 
-      // Log detalhado para debug
-      console.log("Comparação de países:", {
-        clickedOriginal: countryName,
-        clickedNormalized: normalizedClickedName,
-        correctOriginal: correctCountry.name,
-        correctNormalized: normalizedCorrectName,
-        isMatch: normalizedClickedName === normalizedCorrectName,
+      // Debug mais detalhado
+      console.log("Verificação de clique:", {
+        clickedCountry: countryName,
+        normalizedClicked: normalizedClickedName,
+        correctCountry: correctCountry.name,
+        normalizedCorrect: normalizedCorrectName,
+        stage: gameStage,
       });
 
-      // Verifica se os nomes normalizados são iguais
-      if (normalizedClickedName === normalizedCorrectName) {
-        setCorrectCount(correctCount + 1);
+      // Verifica todas as possíveis correspondências
+      const isCorrect =
+        normalizedClickedName === normalizedCorrectName || // Comparação direta normalizada
+        normalizedClickedName === "brasil" || // Verificação específica para Brasil
+        normalizedClickedName === "brazil" || // Variação em inglês
+        countryName === "Brazil" || // Nome exato do GeoJSON
+        countryName === "Brasil" || // Nome em português
+        countryName === "BRA"; // Código ISO
+
+      if (isCorrect) {
+        console.log("Match encontrado! Atualizando pontuação...");
+        setCorrectCount((prevCount) => prevCount + 1);
         alert(`Parabéns! Você acertou a localização de ${correctCountry.name}!`);
-        generateQuestion(); // Move para próxima questão
+        generateQuestion();
       } else {
-        setWrongCount(wrongCount + 1);
+        console.log("Não houve correspondência:", {
+          clicked: countryName,
+          normalized: normalizedClickedName,
+          expected: correctCountry.name,
+        });
+        setWrongCount((prevCount) => prevCount + 1);
         alert(`Incorreto! Você clicou em ${countryName}, mas a resposta correta é ${correctCountry.name}.`);
-        generateQuestion(); // Move para próxima questão mesmo em caso de erro
+        generateQuestion();
       }
     }
   };
@@ -154,19 +166,26 @@ export default function Questions({
         return;
       }
 
-      // Tenta obter o nome do país de várias propriedades possíveis
+      // Log detalhado das propriedades
+      console.log("Feature completa:", countryFeature);
+      console.log("Propriedades:", countryFeature.properties);
+
+      // Tenta obter o nome do país de todas as propriedades possíveis
       const clickedName =
-        countryFeature.properties.NAME_PT || // Tenta primeiro o nome em português
         countryFeature.properties.ADMIN ||
         countryFeature.properties.NAME ||
-        countryFeature.properties.name ||
         countryFeature.properties.NAME_LONG ||
+        countryFeature.properties.ISO_A3 ||
+        countryFeature.properties.name ||
+        countryFeature.properties.name_pt ||
         "País Desconhecido";
 
-      console.log("Clique no país:", {
-        propriedades: countryFeature.properties,
-        nomeUsado: clickedName,
-      });
+      // Se for o Brasil especificamente (índice 44)
+      if (countryFeature.properties.ISO_A3 === "BRA" || clickedName.includes("Brazil") || clickedName.includes("Brasil")) {
+        console.log("Brasil detectado!");
+        handleMapClick("Brasil");
+        return;
+      }
 
       handleMapClick(clickedName);
     }

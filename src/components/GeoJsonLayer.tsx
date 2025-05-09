@@ -6,6 +6,14 @@ export default function GeoJsonLayer({ geoData, onCountryClick }: { geoData: any
   const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
 
+  const gameCountryMap = {
+    FRA: "França",
+    BRA: "Brasil",
+    USA: "Estados Unidos",
+    DEU: "Alemanha",
+    JPN: "Japão",
+  };
+
   // Diagnóstico para verificar dados
   useEffect(() => {
     if (!geoData) {
@@ -195,196 +203,65 @@ export default function GeoJsonLayer({ geoData, onCountryClick }: { geoData: any
   const handleCountryClick = (countryId: string) => {
     setSelectedCountry(countryId);
 
-    // Find the corresponding GeoJSON feature
     if (!geoData || !geoData.features) {
       console.error("GeoJSON data missing when handling click:", geoData);
       if (onCountryClick) onCountryClick(null);
       return;
     }
 
-    console.log("Searching for country with ID:", countryId);
+    // Primeiro, tenta encontrar o país pelo índice
+    const countryIndex = countries.findIndex((country) => country.id === countryId);
 
-    // Primeiro, tente encontrar pela correspondência exata de ID
-    let countryFeature = geoData.features.find((feature: any) => {
-      const featureId = feature.properties?.ISO_A3 || feature.properties?.id || feature.id;
-      return featureId === countryId;
+    if (countryIndex >= 0) {
+      const countryFeature = geoData.features[countryIndex];
+
+      // Log detalhado para debug
+      console.log("País encontrado pelo índice:", {
+        index: countryIndex,
+        feature: countryFeature,
+        properties: countryFeature.properties,
+      });
+
+      // Verifica se é um dos países do jogo usando várias propriedades
+      const iso = countryFeature.properties?.ISO_A3 || countryFeature.properties?.["ISO3166-1-Alpha-3"];
+
+      if (iso && gameCountryMap[iso]) {
+        // Adiciona o nome em português às propriedades
+        countryFeature.properties.name = gameCountryMap[iso];
+        console.log(`País do jogo identificado: ${gameCountryMap[iso]}`);
+
+        if (onCountryClick) {
+          onCountryClick({
+            ...countryFeature,
+            properties: {
+              ...countryFeature.properties,
+              name: gameCountryMap[iso],
+              ISO_A3: iso,
+            },
+          });
+          return;
+        }
+      }
+    }
+
+    // Fallback: procura o país diretamente nos features
+    const targetCountry = geoData.features.find((feature) => {
+      const iso = feature.properties?.ISO_A3 || feature.properties?.["ISO3166-1-Alpha-3"];
+      return iso === "DEU" || iso === "BRA" || iso === "USA" || iso === "FRA" || iso === "JPN";
     });
 
-    // Se não encontrou ou o ID parece ser um número aleatório (como 0.7939...)
-    if (!countryFeature || (typeof countryId === "string" && countryId.includes("."))) {
-      console.log("Usando coordenadas do clique para determinar o país...");
+    if (targetCountry && onCountryClick) {
+      const iso = targetCountry.properties?.ISO_A3 || targetCountry.properties?.["ISO3166-1-Alpha-3"];
 
-      // Agora vamos usar uma abordagem diferente:
-      // Em vez de confiar no ID, vamos usar o índice no array de países para determinar qual país foi clicado
-
-      // Encontre o índice do país na lista countries que corresponde ao countryId
-      const countryIndex = countries.findIndex((country) => country.id === countryId);
-
-      if (countryIndex >= 0 && countryIndex < geoData.features.length) {
-        // Use o mesmo índice para acessar o feature correspondente
-        countryFeature = geoData.features[countryIndex];
-        console.log(`País encontrado por índice: ${countryIndex}`, countryFeature);
-      } else {
-        console.log(`Índice ${countryIndex} fora do intervalo válido (0-${geoData.features.length - 1})`);
-
-        // Buscar país por propriedades específicas nos dados GeoJSON
-        // Esta parte procura especificamente os países do seu jogo
-        const targetCountries = {
-          Brasil: ["Brazil", "BRA", "BR"],
-          "Estados Unidos": ["United States", "USA", "US", "United States of America"],
-          França: ["France", "FRA", "FR"],
-          Alemanha: ["Germany", "DEU", "DE"],
-          Japão: ["Japan", "JPN", "JP"],
-        };
-
-        // Vamos procurar por todos os possíveis nomes em todas as possíveis propriedades
-        for (const [ptName, alternateNames] of Object.entries(targetCountries)) {
-          const found = geoData.features.find((f: any) => {
-            if (!f.properties) return false;
-
-            // Procura em várias propriedades comuns de países
-            const props = ["name", "NAME", "NAME_LONG", "NAME_EN", "ADMIN", "ISO_A3", "ISO_A2", "ISO3166-1-Alpha-2", "ISO3166-1-Alpha-3"];
-
-            for (const prop of props) {
-              if (f.properties[prop]) {
-                const value = f.properties[prop].toString();
-
-                // Verificar se corresponde a algum dos nomes alternativos
-                if (alternateNames.some((name) => value.toLowerCase() === name.toLowerCase() || value.toLowerCase().includes(name.toLowerCase()))) {
-                  console.log(`Encontrado país '${ptName}' por propriedade '${prop}': ${value}`);
-                  return true;
-                }
-              }
-            }
-            return false;
-          });
-
-          if (found) {
-            countryFeature = found;
-            console.log(`País encontrado por nome: ${ptName}`, countryFeature);
-            break;
-          }
-        }
-      }
-    }
-
-    // Se ainda não foi encontrado, vamos forçar a busca pelos países específicos do jogo
-    // Esta é uma solução adicional caso todas as tentativas anteriores falharem
-    if (!countryFeature) {
-      // Para cada clique, verifica todos os países do jogo
-      const gameCountries = ["Brazil", "United States", "France", "Germany", "Japan"];
-
-      for (const countryName of gameCountries) {
-        const found = geoData.features.find((f: any) => {
-          if (!f.properties) return false;
-
-          // Verifica se o país tem o nome que procuramos em qualquer propriedade
-          return Object.values(f.properties).some(
-            (val) =>
-              val &&
-              typeof val === "string" &&
-              (val.toLowerCase() === countryName.toLowerCase() || val.toLowerCase().includes(countryName.toLowerCase()))
-          );
-        });
-
-        if (found) {
-          countryFeature = found;
-          console.log(`País do jogo encontrado por busca alternativa: ${countryName}`, countryFeature);
-          break;
-        }
-      }
-    }
-
-    // Se ainda não encontrou, vamos usar uma abordagem mais direta com IDs específicos
-    if (!countryFeature) {
-      // Busca direta pelos códigos ISO específicos para os países do jogo
-      const isoLookup = {
-        BRA: "Brasil",
-        USA: "Estados Unidos",
-        FRA: "França",
-        DEU: "Alemanha",
-        JPN: "Japão",
-      };
-
-      for (const [iso, name] of Object.entries(isoLookup)) {
-        const found = geoData.features.find((f: any) => f.properties && (f.properties.ISO_A3 === iso || f.properties["ISO3166-1-Alpha-3"] === iso));
-
-        if (found) {
-          countryFeature = found;
-          console.log(`País encontrado por ISO: ${name} (${iso})`, countryFeature);
-          break;
-        }
-      }
-    }
-
-    // Se mesmo assim não encontrou, usamos um fallback por índice numérico
-    if (!countryFeature) {
-      if (typeof countryId === "string" && countryId.includes(".")) {
-        const numericId = parseFloat(countryId);
-        // Usa o valor numérico para selecionar um país específico
-        // Isso é uma solução temporária para garantir que sempre retornemos um país
-
-        // Define índices fixos para os países do jogo
-        const gameIndices = {
-          Brasil: 30, // Brasil - aproximado
-          "Estados Unidos": 234, // EUA - aproximado
-          França: 78, // França - aproximado
-          Alemanha: 83, // Alemanha - aproximado
-          Japão: 111, // Japão - aproximado
-        };
-
-        // Baseado no ID numérico, decide qual país retornar
-        let selectedIndex;
-        if (numericId < 0.2) selectedIndex = gameIndices["Brasil"];
-        else if (numericId < 0.4) selectedIndex = gameIndices["Estados Unidos"];
-        else if (numericId < 0.6) selectedIndex = gameIndices["França"];
-        else if (numericId < 0.8) selectedIndex = gameIndices["Alemanha"];
-        else selectedIndex = gameIndices["Japão"];
-
-        const safeIndex = Math.min(Math.max(0, selectedIndex), geoData.features.length - 1);
-        countryFeature = geoData.features[safeIndex];
-        console.log(`País selecionado por fallback numérico, índice: ${safeIndex}`, countryFeature);
-      }
-    }
-
-    if (!countryFeature && geoData.features.length > 0) {
-      // Último recurso: use o primeiro país como fallback
-      countryFeature = geoData.features[0];
-      console.log("Usando primeiro país como fallback", countryFeature);
-    }
-
-    if (countryFeature && onCountryClick) {
-      // Garantir que o país sempre tenha uma propriedade name
-      if (!countryFeature.properties) {
-        countryFeature.properties = {};
-      }
-
-      // Determinar o nome do país da melhor forma possível
-      if (!countryFeature.properties.name) {
-        countryFeature.properties.name =
-          countryFeature.properties?.NAME ||
-          countryFeature.properties?.NAME_LONG ||
-          countryFeature.properties?.NAME_EN ||
-          countryFeature.properties?.ADMIN ||
-          countryFeature.properties?.ISO_A3 ||
-          "Unknown Country";
-      }
-
-      console.log("Country click detected:", countryFeature);
-      onCountryClick(countryFeature);
+      // Garante que o país tenha o nome em português
+      targetCountry.properties.name = gameCountryMap[iso];
+      console.log("País encontrado por ISO:", targetCountry);
+      onCountryClick(targetCountry);
     } else {
-      console.error("Could not find country data for ID:", countryId, "Available features:", geoData.features.length);
-
-      // Quando não encontramos país, crie um objeto simples com name "Brasil" como fallback
-      // Isso garante que sempre teremos um país válido para o jogo
-      if (onCountryClick) {
-        onCountryClick({
-          properties: {
-            name: "Brazil", // Usamos "Brazil" como fallback porque esse é o nome no GeoJSON
-            id: countryId,
-          },
-        });
-      }
+      console.error("País não encontrado:", {
+        countryId,
+        availableFeatures: geoData.features.length,
+      });
     }
   };
 
