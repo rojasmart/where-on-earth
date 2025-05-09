@@ -115,41 +115,33 @@ export default function Questions({
 
   const handleMapClick = (countryName: string) => {
     if (gameStage === "map" && correctCountry) {
-      // Remove acentos e converte para minúsculas para comparação
-      const normalizedClickedName = normalizeCountryName(countryName);
-      const normalizedCorrectName = normalizeCountryName(correctCountry.name);
+      console.log("Handling map click for:", countryName);
 
-      // Debug mais detalhado
-      console.log("Verificação de clique:", {
-        clickedCountry: countryName,
-        normalizedClicked: normalizedClickedName,
-        correctCountry: correctCountry.name,
-        normalizedCorrect: normalizedCorrectName,
-        stage: gameStage,
+      // Mapeamento de ISO codes para nomes em português
+      const isoToName = {
+        BRA: "Brasil",
+        USA: "Estados Unidos",
+        FRA: "França",
+        DEU: "Alemanha",
+        JPN: "Japão",
+      };
+
+      // Se o nome for um código ISO, converte para o nome em português
+      const processedName = isoToName[countryName] || countryName;
+
+      console.log("Country comparison:", {
+        clicked: processedName,
+        correct: correctCountry.name,
+        isMatch: processedName === correctCountry.name,
       });
 
-      // Verifica todas as possíveis correspondências
-      const isCorrect =
-        normalizedClickedName === normalizedCorrectName || // Comparação direta normalizada
-        normalizedClickedName === "brasil" || // Verificação específica para Brasil
-        normalizedClickedName === "brazil" || // Variação em inglês
-        countryName === "Brazil" || // Nome exato do GeoJSON
-        countryName === "Brasil" || // Nome em português
-        countryName === "BRA"; // Código ISO
-
-      if (isCorrect) {
-        console.log("Match encontrado! Atualizando pontuação...");
-        setCorrectCount((prevCount) => prevCount + 1);
+      if (processedName === correctCountry.name) {
+        setCorrectCount((prev) => prev + 1);
         alert(`Parabéns! Você acertou a localização de ${correctCountry.name}!`);
         generateQuestion();
       } else {
-        console.log("Não houve correspondência:", {
-          clicked: countryName,
-          normalized: normalizedClickedName,
-          expected: correctCountry.name,
-        });
-        setWrongCount((prevCount) => prevCount + 1);
-        alert(`Incorreto! Você clicou em ${countryName}, mas a resposta correta é ${correctCountry.name}.`);
+        setWrongCount((prev) => prev + 1);
+        alert(`Incorreto! Você clicou em ${processedName}, mas a resposta correta é ${correctCountry.name}.`);
         generateQuestion();
       }
     }
@@ -166,28 +158,24 @@ export default function Questions({
         return;
       }
 
-      // Log detalhado das propriedades
-      console.log("Feature completa:", countryFeature);
-      console.log("Propriedades:", countryFeature.properties);
+      // Log para debug
+      console.log("Country feature:", countryFeature);
 
-      // Tenta obter o nome do país de todas as propriedades possíveis
-      const clickedName =
-        countryFeature.properties.ADMIN ||
-        countryFeature.properties.NAME ||
-        countryFeature.properties.NAME_LONG ||
-        countryFeature.properties.ISO_A3 ||
-        countryFeature.properties.name ||
-        countryFeature.properties.name_pt ||
-        "País Desconhecido";
+      // Pega o código ISO ou nome do país
+      const countryCode = countryFeature.properties.ISO_A3 || countryFeature.properties["ISO3166-1-Alpha-3"];
 
-      // Se for o Brasil especificamente (índice 44)
-      if (countryFeature.properties.ISO_A3 === "BRA" || clickedName.includes("Brazil") || clickedName.includes("Brasil")) {
-        console.log("Brasil detectado!");
-        handleMapClick("Brasil");
+      if (countryCode) {
+        console.log("Country code detected:", countryCode);
+        handleMapClick(countryCode);
         return;
       }
 
-      handleMapClick(clickedName);
+      // Fallback para o nome do país
+      const countryName = countryFeature.properties.name;
+      if (countryName) {
+        console.log("Country name detected:", countryName);
+        handleMapClick(countryName);
+      }
     }
   };
 

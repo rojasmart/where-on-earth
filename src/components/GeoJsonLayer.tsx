@@ -204,64 +204,27 @@ export default function GeoJsonLayer({ geoData, onCountryClick }: { geoData: any
     setSelectedCountry(countryId);
 
     if (!geoData || !geoData.features) {
-      console.error("GeoJSON data missing when handling click:", geoData);
-      if (onCountryClick) onCountryClick(null);
+      console.error("GeoJSON data missing when handling click");
       return;
     }
 
-    // Primeiro, tenta encontrar o país pelo índice
-    const countryIndex = countries.findIndex((country) => country.id === countryId);
+    // Find the country feature
+    const countryFeature = geoData.features.find((feature) => {
+      const iso = feature.properties?.ISO_A3 || feature.properties?.["ISO3166-1-Alpha-3"];
+      return iso === countryId || feature.properties?.name === countryId;
+    });
 
-    if (countryIndex >= 0) {
-      const countryFeature = geoData.features[countryIndex];
-
-      // Log detalhado para debug
-      console.log("País encontrado pelo índice:", {
-        index: countryIndex,
-        feature: countryFeature,
+    if (countryFeature) {
+      console.log("Country clicked:", {
+        id: countryId,
         properties: countryFeature.properties,
       });
 
-      // Verifica se é um dos países do jogo usando várias propriedades
-      const iso = countryFeature.properties?.ISO_A3 || countryFeature.properties?.["ISO3166-1-Alpha-3"];
-
-      if (iso && gameCountryMap[iso]) {
-        // Adiciona o nome em português às propriedades
-        countryFeature.properties.name = gameCountryMap[iso];
-        console.log(`País do jogo identificado: ${gameCountryMap[iso]}`);
-
-        if (onCountryClick) {
-          onCountryClick({
-            ...countryFeature,
-            properties: {
-              ...countryFeature.properties,
-              name: gameCountryMap[iso],
-              ISO_A3: iso,
-            },
-          });
-          return;
-        }
+      if (onCountryClick) {
+        onCountryClick(countryFeature);
       }
-    }
-
-    // Fallback: procura o país diretamente nos features
-    const targetCountry = geoData.features.find((feature) => {
-      const iso = feature.properties?.ISO_A3 || feature.properties?.["ISO3166-1-Alpha-3"];
-      return iso === "DEU" || iso === "BRA" || iso === "USA" || iso === "FRA" || iso === "JPN";
-    });
-
-    if (targetCountry && onCountryClick) {
-      const iso = targetCountry.properties?.ISO_A3 || targetCountry.properties?.["ISO3166-1-Alpha-3"];
-
-      // Garante que o país tenha o nome em português
-      targetCountry.properties.name = gameCountryMap[iso];
-      console.log("País encontrado por ISO:", targetCountry);
-      onCountryClick(targetCountry);
     } else {
-      console.error("País não encontrado:", {
-        countryId,
-        availableFeatures: geoData.features.length,
-      });
+      console.error("Country not found:", countryId);
     }
   };
 
