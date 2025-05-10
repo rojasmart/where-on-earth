@@ -115,33 +115,28 @@ export default function Questions({
 
   const handleMapClick = (countryName: string) => {
     if (gameStage === "map" && correctCountry) {
-      console.log("Handling map click for:", countryName);
+      // Atualiza o país clicado para exibir na interface
+      setClickedCountry(countryName);
 
-      // Mapeamento de ISO codes para nomes em português
-      const isoToName = {
-        BRA: "Brasil",
-        USA: "Estados Unidos",
-        FRA: "França",
-        DEU: "Alemanha",
-        JPN: "Japão",
-      };
+      // Normaliza ambos os nomes para comparação robusta
+      const normalizedClicked = normalizeCountryName(countryName);
+      const normalizedCorrect = normalizeCountryName(correctCountry.name);
 
-      // Se o nome for um código ISO, converte para o nome em português
-      const processedName = isoToName[countryName] || countryName;
-
-      console.log("Country comparison:", {
-        clicked: processedName,
-        correct: correctCountry.name,
-        isMatch: processedName === correctCountry.name,
+      console.log("Comparação de países:", {
+        clickedOriginal: countryName,
+        clickedNormalized: normalizedClicked,
+        correctOriginal: correctCountry.name,
+        correctNormalized: normalizedCorrect,
+        isMatch: normalizedClicked === normalizedCorrect,
       });
 
-      if (processedName === correctCountry.name) {
+      if (normalizedClicked === normalizedCorrect) {
         setCorrectCount((prev) => prev + 1);
         alert(`Parabéns! Você acertou a localização de ${correctCountry.name}!`);
         generateQuestion();
       } else {
         setWrongCount((prev) => prev + 1);
-        alert(`Incorreto! Você clicou em ${processedName}, mas a resposta correta é ${correctCountry.name}.`);
+        alert(`Incorreto! Você clicou em ${countryName}, mas a resposta correta é ${correctCountry.name}.`);
         generateQuestion();
       }
     }
@@ -158,22 +153,14 @@ export default function Questions({
         return;
       }
 
-      // Log para debug
-      console.log("Country feature:", countryFeature);
+      // Use o nome traduzido se existir, senão ISO, senão nome original
+      const countryName =
+        countryFeature.properties.translatedName ||
+        countryFeature.properties.name ||
+        countryFeature.properties.ISO_A3 ||
+        countryFeature.properties["ISO3166-1-Alpha-3"];
 
-      // Pega o código ISO ou nome do país
-      const countryCode = countryFeature.properties.ISO_A3 || countryFeature.properties["ISO3166-1-Alpha-3"];
-
-      if (countryCode) {
-        console.log("Country code detected:", countryCode);
-        handleMapClick(countryCode);
-        return;
-      }
-
-      // Fallback para o nome do país
-      const countryName = countryFeature.properties.name;
       if (countryName) {
-        console.log("Country name detected:", countryName);
         handleMapClick(countryName);
       }
     }
