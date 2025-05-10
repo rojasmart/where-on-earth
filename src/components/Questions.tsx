@@ -7,76 +7,76 @@ interface Country {
 }
 
 const countries: Country[] = [
-  { name: "Brasil", code: "br" },
-  { name: "Estados Unidos", code: "us" },
-  { name: "França", code: "fr" },
-  { name: "Alemanha", code: "de" },
-  { name: "Japão", code: "jp" },
-  { name: "Argentina", code: "ar" },
-  { name: "Canadá", code: "ca" },
-  { name: "Reino Unido", code: "gb" },
-  { name: "Austrália", code: "au" },
-  { name: "Índia", code: "in" },
-  { name: "China", code: "cn" },
-  { name: "Rússia", code: "ru" },
-  { name: "Itália", code: "it" },
-  { name: "Espanha", code: "es" },
-  { name: "México", code: "mx" },
-  { name: "África do Sul", code: "za" },
-  { name: "Turquia", code: "tr" },
-  { name: "Egipto", code: "eg" },
-  { name: "Suécia", code: "se" },
-  { name: "Noruega", code: "no" },
-  { name: "Dinamarca", code: "dk" },
-  { name: "Finlândia", code: "fi" },
-  { name: "Polónia", code: "pl" },
-  { name: "Bélgica", code: "be" },
-  { name: "Países Baixos", code: "nl" },
-  { name: "Suíça", code: "ch" },
-  { name: "Áustria", code: "at" },
-  { name: "Grécia", code: "gr" },
-  { name: "Portugal", code: "pt" },
-  { name: "Irlanda", code: "ie" },
-  { name: "República Checa", code: "cz" },
-  { name: "Hungria", code: "hu" },
-  { name: "Roménia", code: "ro" },
-  { name: "Bulgária", code: "bg" },
-  { name: "Sérvia", code: "rs" },
-  { name: "Croácia", code: "hr" },
-  { name: "Eslovénia", code: "si" },
-  { name: "Eslováquia", code: "sk" },
-  { name: "Islândia", code: "is" },
-  { name: "Malásia", code: "my" },
-  { name: "Singapura", code: "sg" },
-  { name: "Filipinas", code: "ph" },
-  { name: "Indonésia", code: "id" },
-  { name: "Tailândia", code: "th" },
-  { name: "Vietname", code: "vn" },
-  { name: "Coreia do Sul", code: "kr" },
-  { name: "Nova Zelândia", code: "nz" },
-  { name: "Colômbia", code: "co" },
-  { name: "Chile", code: "cl" },
-  { name: "Peru", code: "pe" },
-  { name: "Venezuela", code: "ve" },
-  { name: "Equador", code: "ec" },
-  { name: "Paraguai", code: "py" },
-  { name: "Uruguai", code: "uy" },
-  { name: "Bolívia", code: "bo" },
-  { name: "Costa Rica", code: "cr" },
-  { name: "Panamá", code: "pa" },
-  { name: "Cuba", code: "cu" },
-  { name: "República Dominicana", code: "do" },
-  { name: "Honduras", code: "hn" },
-  { name: "Guatemala", code: "gt" },
-  { name: "El Salvador", code: "sv" },
-  { name: "Nicarágua", code: "ni" },
-  { name: "Jamaica", code: "jm" },
-  { name: "Trindade e Tobago", code: "tt" },
-  { name: "Barbados", code: "bb" },
-  { name: "Bahamas", code: "bs" },
-  { name: "Santa Lúcia", code: "lc" },
-  { name: "São Vicente e Granadinas", code: "vc" },
-  { name: "Antígua e Barbuda", code: "ag" },
+  { name: "Brasil", code: "BR" },
+  { name: "Estados Unidos", code: "US" },
+  { name: "França", code: "FR" },
+  { name: "Alemanha", code: "DE" },
+  { name: "Japão", code: "JP" },
+  { name: "Argentina", code: "AR" },
+  { name: "Canadá", code: "CA" },
+  { name: "Reino Unido", code: "GB" },
+  { name: "Austrália", code: "AU" },
+  { name: "Índia", code: "IN" },
+  { name: "China", code: "CN" },
+  { name: "Rússia", code: "RU" },
+  { name: "Itália", code: "IT" },
+  { name: "Espanha", code: "ES" },
+  { name: "México", code: "MX" },
+  { name: "África do Sul", code: "ZA" },
+  { name: "Turquia", code: "TR" },
+  { name: "Egito", code: "EG" },
+  { name: "Suécia", code: "SE" },
+  { name: "Noruega", code: "NO" },
+  { name: "Dinamarca", code: "DK" },
+  { name: "Finlândia", code: "FI" },
+  { name: "Polônia", code: "PL" },
+  { name: "Bélgica", code: "BE" },
+  { name: "Países Baixos", code: "NL" },
+  { name: "Suíça", code: "CH" },
+  { name: "Áustria", code: "AT" },
+  { name: "Grécia", code: "GR" },
+  { name: "Portugal", code: "PT" },
+  { name: "Irlanda", code: "IE" },
+  { name: "República Tcheca", code: "CZ" },
+  { name: "Hungria", code: "HU" },
+  { name: "Romênia", code: "RO" },
+  { name: "Bulgária", code: "BG" },
+  { name: "Sérvia", code: "RS" },
+  { name: "Croácia", code: "HR" },
+  { name: "Eslovênia", code: "SI" },
+  { name: "Eslováquia", code: "SK" },
+  { name: "Islândia", code: "IS" },
+  { name: "Malásia", code: "MY" },
+  { name: "Cingapura", code: "SG" },
+  { name: "Filipinas", code: "PH" },
+  { name: "Indonésia", code: "ID" },
+  { name: "Tailândia", code: "TH" },
+  { name: "Vietnã", code: "VN" },
+  { name: "Coréia do Sul", code: "KR" },
+  { name: "Nova Zelândia", code: "NZ" },
+  { name: "Colômbia", code: "CO" },
+  { name: "Chile", code: "CL" },
+  { name: "Peru", code: "PE" },
+  { name: "Venezuela", code: "VE" },
+  { name: "Equador", code: "EC" },
+  { name: "Paraguai", code: "PY" },
+  { name: "Uruguai", code: "UY" },
+  { name: "Bolívia", code: "BO" },
+  { name: "Costa Rica", code: "CR" },
+  { name: "Panamá", code: "PA" },
+  { name: "Cuba", code: "CU" },
+  { name: "República Dominicana", code: "DO" },
+  { name: "Honduras", code: "HN" },
+  { name: "Guatemala", code: "GT" },
+  { name: "El Salvador", code: "SV" },
+  { name: "Nicarágua", code: "NI" },
+  { name: "Jamaica", code: "JM" },
+  { name: "Trinidad e Tobago", code: "TT" },
+  { name: "Barbados", code: "BB" },
+  { name: "Bahamas", code: "BS" },
+  { name: "Saint Lucia", code: "LC" },
+  { name: "São Vicente e Granadinas", code: "VC" },
+  { name: "Antígua e Barbuda", code: "AG" },
 ];
 
 // Função para normalizar nomes de países
@@ -151,33 +151,39 @@ export default function Questions({
     registerClickHandler(onCountryClick);
   }, [registerClickHandler]);
 
+  useEffect(() => {
+    console.log("Registering click handler"); // Debug log
+    registerClickHandler(onCountryClick);
+  }, [correctCountry]); // Adicione correctCountry como dependência
+
   const generateQuestion = () => {
     const shuffledCountries = [...countries].sort(() => Math.random() - 0.5);
     const correct = shuffledCountries[0];
     setCorrectCountry(correct);
-    setOptions(shuffledCountries.slice(0, 3)); // Seleciona 3 opções
+    setOptions(shuffledCountries.slice(0, 3));
     setGameStage("flag");
     setInstruction("Que país pertence a esta bandeira?");
+    setClickedCountry(null); // Reset clicked country
   };
 
   const handleAnswer = (selectedCountry: Country) => {
-    setClickedCountry(selectedCountry.name); // Atualiza o país clicado
+    setClickedCountry(selectedCountry.name);
 
     if (selectedCountry.name === correctCountry?.name) {
       // Correct flag identification
       setGameStage("map");
       setInstruction(`Agora clique no mapa onde fica ${correctCountry.name}`);
-      if (correctCountry) {
-        onPin(correctCountry.coordinates);
-      }
     } else {
       // Wrong flag identification
-      setWrongCount(wrongCount + 1);
-      generateQuestion(); // Move to next question
+      setWrongCount((prev) => prev + 1);
+      alert(`Incorreto! A bandeira pertence a ${correctCountry?.name}`);
+      generateQuestion();
     }
   };
 
   const handleMapClick = (countryName: string) => {
+    console.log("handleMapClick called with:", countryName); // Debug log
+
     if (gameStage === "map" && correctCountry) {
       // Atualiza o país clicado para exibir na interface
       setClickedCountry(countryName);
@@ -186,12 +192,9 @@ export default function Questions({
       const normalizedClicked = normalizeCountryName(countryName);
       const normalizedCorrect = normalizeCountryName(correctCountry.name);
 
-      console.log("Comparação de países:", {
-        clickedOriginal: countryName,
-        clickedNormalized: normalizedClicked,
-        correctOriginal: correctCountry.name,
-        correctNormalized: normalizedCorrect,
-        isMatch: normalizedClicked === normalizedCorrect,
+      console.log("Comparing countries:", {
+        clicked: normalizedClicked,
+        correct: normalizedCorrect,
       });
 
       if (normalizedClicked === normalizedCorrect) {
@@ -201,28 +204,23 @@ export default function Questions({
       } else {
         setWrongCount((prev) => prev + 1);
         alert(`Incorreto! Você clicou em ${countryName}, mas a resposta correta é ${correctCountry.name}.`);
-        generateQuestion();
       }
     }
   };
 
-  // Add this function to your component to be passed to App.tsx
-  // and then to GeoJsonLayer.tsx
-  // Em Questions.tsx, modifique a função onCountryClick:
-
   const onCountryClick = (countryFeature: any) => {
+    console.log("onCountryClick called with:", countryFeature); // Debug log
+
     if (gameStage === "map") {
       if (!countryFeature || !countryFeature.properties) {
-        console.error("Dados do país inválidos");
+        console.error("Dados do país inválidos", countryFeature);
         return;
       }
 
       // Use o nome traduzido se existir, senão ISO, senão nome original
-      const countryName =
-        countryFeature.properties.translatedName ||
-        countryFeature.properties.name ||
-        countryFeature.properties.ISO_A3 ||
-        countryFeature.properties["ISO3166-1-Alpha-3"];
+      const countryName = countryFeature.properties.translatedName || countryFeature.properties.name || countryFeature.properties.ISO_A3;
+
+      console.log("Country name extracted:", countryName); // Debug log
 
       if (countryName) {
         handleMapClick(countryName);
@@ -234,7 +232,11 @@ export default function Questions({
     <div className="quiz-container" style={styles.container}>
       {correctCountry && (
         <>
-          <img src={`https://flagcdn.com/w320/${correctCountry.code}.png`} alt={`Bandeira de ${correctCountry.name}`} style={styles.flag} />
+          <img
+            src={`https://flagcdn.com/h240/${correctCountry.code.toLowerCase()}.png`}
+            alt={`Bandeira de ${correctCountry.name}`}
+            style={styles.flag}
+          />
           <p style={styles.question}>{instruction}</p>
 
           {gameStage === "flag" && (

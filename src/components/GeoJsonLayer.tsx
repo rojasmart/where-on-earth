@@ -7,12 +7,50 @@ export default function GeoJsonLayer({ geoData, onCountryClick }: { geoData: any
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
 
   const gameCountryMap = {
-    FRA: "França",
-    BRA: "Brasil",
-    USA: "Estados Unidos",
-    DEU: "Alemanha",
-    JPN: "Japão",
+    FR: "França",
+    BR: "Brasil",
+    US: "Estados Unidos",
+    DE: "Alemanha",
+    JP: "Japão",
+    PE: "Peru",
+    AR: "Argentina",
+    CL: "Chile",
+    CO: "Colômbia",
+    CA: "Canadá",
+    GB: "Reino Unido",
+    AU: "Austrália",
+    IN: "Índia",
+    CN: "China",
+    RU: "Rússia",
+    IT: "Itália",
+    ES: "Espanha",
+    ZA: "África do Sul",
+    TR: "Turquia",
+    EG: "Egito",
+    SE: "Suécia",
+    NO: "Noruega",
+    DK: "Dinamarca",
+    FI: "Finlândia",
+    PL: "Polônia",
+    BE: "Bélgica",
+    NL: "Países Baixos",
+    CH: "Suíça",
+    AT: "Áustria",
+    GR: "Grécia",
+    PT: "Portugal",
+    IE: "Irlanda",
+    CZ: "República Tcheca",
+    HU: "Hungria",
+    RO: "Romênia",
+    BG: "Bulgária",
+    RS: "Sérvia",
+    HR: "Croácia",
+    SI: "Eslovênia",
+    SK: "Eslováquia",
   };
+
+  // Garante que gameCountryMap seja usado na lógica do componente
+  console.log("Mapa de Países do Jogo:", gameCountryMap);
 
   // Diagnóstico para verificar dados
   useEffect(() => {
@@ -208,62 +246,50 @@ export default function GeoJsonLayer({ geoData, onCountryClick }: { geoData: any
       return;
     }
 
-    // Log para debug do ID recebido
-    console.log("Received countryId:", countryId);
+    console.log("Searching for country with ID:", countryId);
 
-    // Find the country feature with expanded search
     const countryFeature = geoData.features.find((feature) => {
-      if (!feature.properties) return false;
-
-      const iso = feature.properties.ISO_A3 || feature.properties["ISO3166-1-Alpha-3"] || feature.properties.iso_a3;
-
-      const name = feature.properties.name || feature.properties.NAME || feature.properties.ADMIN;
-
-      // Log para debug de cada feature checada
-      console.log("Checking feature:", {
-        iso,
-        name,
-        countryId,
-        properties: feature.properties,
-      });
-
-      // Verifica se é um dos países do jogo
-      if (gameCountryMap[iso]) {
-        console.log("Found game country:", gameCountryMap[iso]);
-        feature.properties.name = gameCountryMap[iso];
-        return true;
+      if (!feature || !feature.properties) {
+        console.log("Invalid feature or no properties:", feature);
+        return false;
       }
 
-      return iso === countryId || name === countryId;
+      // Log para debug dos dados do feature
+      console.log("Feature being checked:", {
+        id: feature.id,
+        properties: feature.properties,
+        iso2: feature.properties["ISO3166-1-Alpha-2"] || feature.properties.ISO_A2,
+      });
+
+      // Extrai o código ISO de 2 letras
+      const featureIso2 = (feature.properties["ISO3166-1-Alpha-2"] || feature.properties.ISO_A2 || "").toUpperCase();
+
+      const searchId = countryId.toUpperCase();
+
+      // Verifica a correspondência usando o código ISO de 2 letras
+      return featureIso2 === searchId;
     });
 
-    if (countryFeature) {
-      console.log("Country matched:", {
-        id: countryId,
-        properties: countryFeature.properties,
-        translatedName: gameCountryMap[countryFeature.properties.ISO_A3],
-      });
+    console.log("Found country feature:", countryFeature);
 
-      if (onCountryClick) {
-        // Adiciona o nome traduzido às propriedades
-        const enhancedFeature = {
-          ...countryFeature,
-          properties: {
-            ...countryFeature.properties,
-            name: gameCountryMap[countryFeature.properties.ISO_A3] || countryFeature.properties.name,
-          },
-        };
+    if (countryFeature && onCountryClick) {
+      // Atualiza o gameCountryMap para usar códigos ISO de 2 letras
+      const translatedName = gameCountryMap[countryId.toUpperCase()];
 
-        onCountryClick(enhancedFeature);
-      }
+      const enhancedFeature = {
+        ...countryFeature,
+        properties: {
+          ...countryFeature.properties,
+          translatedName: translatedName || countryFeature.properties.name,
+          name: translatedName || countryFeature.properties.name || countryFeature.properties.NAME,
+          originalId: countryId,
+        },
+      };
+
+      console.log("Enhanced feature:", enhancedFeature);
+      onCountryClick(enhancedFeature);
     } else {
-      console.error("Country not found:", {
-        searchedId: countryId,
-        availableCountries: geoData.features.map((f) => ({
-          iso: f.properties?.ISO_A3,
-          name: f.properties?.name,
-        })),
-      });
+      console.log("No matching country found for ID:", countryId);
     }
   };
 
