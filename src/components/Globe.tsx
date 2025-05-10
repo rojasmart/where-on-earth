@@ -10,7 +10,7 @@ export default function Globe({
   onCountryClick,
 }: {
   pinCoordinates: [number, number] | null;
-  onCountryClick: ((country: any) => void) | null;
+  onCountryClick: (country: any) => void;
 }) {
   const [geoData, setGeoData] = useState(null);
   const [pinPosition, setPinPosition] = useState<THREE.Vector3 | null>(null);
