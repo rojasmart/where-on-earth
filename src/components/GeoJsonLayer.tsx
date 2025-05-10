@@ -208,23 +208,62 @@ export default function GeoJsonLayer({ geoData, onCountryClick }: { geoData: any
       return;
     }
 
-    // Find the country feature
+    // Log para debug do ID recebido
+    console.log("Received countryId:", countryId);
+
+    // Find the country feature with expanded search
     const countryFeature = geoData.features.find((feature) => {
-      const iso = feature.properties?.ISO_A3 || feature.properties?.["ISO3166-1-Alpha-3"];
-      return iso === countryId || feature.properties?.name === countryId;
+      if (!feature.properties) return false;
+
+      const iso = feature.properties.ISO_A3 || feature.properties["ISO3166-1-Alpha-3"] || feature.properties.iso_a3;
+
+      const name = feature.properties.name || feature.properties.NAME || feature.properties.ADMIN;
+
+      // Log para debug de cada feature checada
+      console.log("Checking feature:", {
+        iso,
+        name,
+        countryId,
+        properties: feature.properties,
+      });
+
+      // Verifica se é um dos países do jogo
+      if (gameCountryMap[iso]) {
+        console.log("Found game country:", gameCountryMap[iso]);
+        feature.properties.name = gameCountryMap[iso];
+        return true;
+      }
+
+      return iso === countryId || name === countryId;
     });
 
     if (countryFeature) {
-      console.log("Country clicked:", {
+      console.log("Country matched:", {
         id: countryId,
         properties: countryFeature.properties,
+        translatedName: gameCountryMap[countryFeature.properties.ISO_A3],
       });
 
       if (onCountryClick) {
-        onCountryClick(countryFeature);
+        // Adiciona o nome traduzido às propriedades
+        const enhancedFeature = {
+          ...countryFeature,
+          properties: {
+            ...countryFeature.properties,
+            name: gameCountryMap[countryFeature.properties.ISO_A3] || countryFeature.properties.name,
+          },
+        };
+
+        onCountryClick(enhancedFeature);
       }
     } else {
-      console.error("Country not found:", countryId);
+      console.error("Country not found:", {
+        searchedId: countryId,
+        availableCountries: geoData.features.map((f) => ({
+          iso: f.properties?.ISO_A3,
+          name: f.properties?.name,
+        })),
+      });
     }
   };
 
