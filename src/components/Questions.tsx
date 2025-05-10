@@ -209,22 +209,33 @@ export default function Questions({
   };
 
   const onCountryClick = (countryFeature: any) => {
-    console.log("onCountryClick called with:", countryFeature); // Debug log
-
-    if (gameStage === "map") {
+    if (gameStage === "map" && correctCountry) {
       if (!countryFeature || !countryFeature.properties) {
         console.error("Dados do país inválidos", countryFeature);
         return;
       }
 
-      // Use o nome traduzido se existir, senão ISO, senão nome original
-      const countryName = countryFeature.properties.translatedName || countryFeature.properties.name || countryFeature.properties.ISO_A3;
+      // Pega o código ISO de 2 letras do país clicado
+      const clickedIso2 = countryFeature.properties["ISO3166-1-Alpha-2"] || countryFeature.properties.ISO_A2;
 
-      console.log("Country name extracted:", countryName); // Debug log
+      console.log("Comparing countries:", {
+        clicked: clickedIso2,
+        correct: correctCountry.code,
+      });
 
-      if (countryName) {
-        handleMapClick(countryName);
+      // Compara os códigos ISO2
+      if (clickedIso2?.toUpperCase() === correctCountry.code.toUpperCase()) {
+        setCorrectCount((prev) => prev + 1);
+        alert(`Parabéns! Você acertou a localização de ${correctCountry.name}!`);
+        generateQuestion(); // Gera nova questão
+      } else {
+        setWrongCount((prev) => prev + 1);
+        const clickedName = countryFeature.properties.translatedName || countryFeature.properties.name;
+        alert(`Incorreto! Você clicou em ${clickedName}, mas a resposta correta é ${correctCountry.name}.`);
       }
+
+      // Atualiza o país clicado para exibir na interface
+      setClickedCountry(countryFeature.properties.translatedName || countryFeature.properties.name);
     }
   };
 
