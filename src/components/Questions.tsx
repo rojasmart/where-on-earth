@@ -128,18 +128,12 @@ const normalizeCountryName = (name: string): string => {
   return countryNameMap[normalized] || normalized;
 };
 
-export default function Questions({
-  onPin,
-  registerClickHandler,
-}: {
-  onPin: (coordinates: [number, number]) => void;
-  registerClickHandler: (handler: (country: any) => void) => void;
-}) {
+export default function Questions({ registerClickHandler }: { registerClickHandler: (handler: (country: any) => void) => void }) {
   const [correctCountry, setCorrectCountry] = useState<Country | null>(null);
+  const [clickedCountry, setClickedCountry] = useState<string | null>(null);
   const [options, setOptions] = useState<Country[]>([]);
   const [correctCount, setCorrectCount] = useState(0);
   const [wrongCount, setWrongCount] = useState(0);
-  const [clickedCountry, setClickedCountry] = useState<string | null>(null);
   const [gameStage, setGameStage] = useState<"flag" | "map">("flag");
   const [instruction, setInstruction] = useState<string>("");
 
@@ -149,12 +143,13 @@ export default function Questions({
 
   useEffect(() => {
     registerClickHandler(onCountryClick);
-  }, [registerClickHandler]);
+  }, [correctCountry, gameStage]); // Adiciona gameStage como dependência
 
   useEffect(() => {
-    console.log("Registering click handler"); // Debug log
-    registerClickHandler(onCountryClick);
-  }, [correctCountry]); // Adicione correctCountry como dependência
+    if (gameStage === "map" && correctCountry) {
+      registerClickHandler(onCountryClick);
+    }
+  }, [correctCountry, gameStage]);
 
   const generateQuestion = () => {
     const shuffledCountries = [...countries].sort(() => Math.random() - 0.5);
@@ -163,18 +158,18 @@ export default function Questions({
     setOptions(shuffledCountries.slice(0, 3));
     setGameStage("flag");
     setInstruction("Que país pertence a esta bandeira?");
-    setClickedCountry(null); // Reset clicked country
+    setClickedCountry(null);
   };
 
   const handleAnswer = (selectedCountry: Country) => {
-    setClickedCountry(selectedCountry.name);
+    if (gameStage !== "flag") return;
 
-    if (selectedCountry.name === correctCountry?.name) {
-      // Correct flag identification
+    setClickedCountry(selectedCountry.code); // Usa o código ISO2
+
+    if (selectedCountry.code === correctCountry?.code) {
       setGameStage("map");
       setInstruction(`Agora clique no mapa onde fica ${correctCountry.name}`);
     } else {
-      // Wrong flag identification
       setWrongCount((prev) => prev + 1);
       alert(`Incorreto! A bandeira pertence a ${correctCountry?.name}`);
       generateQuestion();
@@ -209,33 +204,39 @@ export default function Questions({
   };
 
   const onCountryClick = (countryFeature: any) => {
-    if (gameStage === "map" && correctCountry) {
-      if (!countryFeature || !countryFeature.properties) {
-        console.error("Dados do país inválidos", countryFeature);
-        return;
-      }
+    console.log("onCountryClick received:", countryFeature); // Debug log
 
-      // Pega o código ISO de 2 letras do país clicado
-      const clickedIso2 = countryFeature.properties["ISO3166-1-Alpha-2"] || countryFeature.properties.ISO_A2;
+    if (!countryFeature || !countryFeature.properties) {
+      console.error("Invalid country feature received:", countryFeature);
+      return;
+    }
 
-      console.log("Comparing countries:", {
-        clicked: clickedIso2,
-        correct: correctCountry.code,
-      });
+    if (gameStage !== "map" || !correctCountry) {
+      console.log("Wrong game stage or no correct country:", { gameStage, correctCountry });
+      return;
+    }
 
-      // Compara os códigos ISO2
-      if (clickedIso2?.toUpperCase() === correctCountry.code.toUpperCase()) {
-        setCorrectCount((prev) => prev + 1);
-        alert(`Parabéns! Você acertou a localização de ${correctCountry.name}!`);
-        generateQuestion(); // Gera nova questão
-      } else {
-        setWrongCount((prev) => prev + 1);
-        const clickedName = countryFeature.properties.translatedName || countryFeature.properties.name;
-        alert(`Incorreto! Você clicou em ${clickedName}, mas a resposta correta é ${correctCountry.name}.`);
-      }
+    const clickedIso2 = (countryFeature.properties["ISO3166-1-Alpha-2"] || countryFeature.properties.ISO_A2)?.toUpperCase();
 
-      // Atualiza o país clicado para exibir na interface
-      setClickedCountry(countryFeature.properties.translatedName || countryFeature.properties.name);
+    console.log("Comparing countries:", {
+      clicked: clickedIso2,
+      correct: correctCountry.code,
+      stage: gameStage,
+    });
+
+    if (!clickedIso2) {
+      console.error("No ISO2 code found in country feature");
+      return;
+    }
+
+    if (clickedIso2 === correctCountry.code) {
+      setCorrectCount((prev) => prev + 1);
+      alert(`Parabéns! Você acertou a localização de ${correctCountry.name}!`);
+      generateQuestion();
+    } else {
+      setWrongCount((prev) => prev + 1);
+      const clickedName = countryFeature.properties.translatedName || gameCountryMap[clickedIso2] || countryFeature.properties.name || clickedIso2;
+      alert(`Incorreto! Você clicou em ${clickedName}, mas a resposta correta é ${correctCountry.name}`);
     }
   };
 

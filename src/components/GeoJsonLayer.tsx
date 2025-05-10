@@ -6,9 +6,6 @@ export default function GeoJsonLayer({ geoData, onCountryClick }: { geoData: any
   const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
 
-  console.log("hoveredCountry", hoveredCountry);
-  console.log("selectedCountry", selectedCountry);
-
   const gameCountryMap = {
     FR: "França",
     BR: "Brasil",
@@ -247,27 +244,37 @@ export default function GeoJsonLayer({ geoData, onCountryClick }: { geoData: any
   };
 
   const handleCountryClick = (countryId: string) => {
-    setSelectedCountry(countryId);
+    if (!countryId || !geoData?.features) {
+      console.error("Invalid click or missing geoData");
+      return;
+    }
 
-    if (!geoData || !geoData.features) return;
+    setSelectedCountry(countryId);
 
     const countryFeature = geoData.features.find((feature) => {
       if (!feature?.properties) return false;
 
       const featureIso2 = (feature.properties["ISO3166-1-Alpha-2"] || feature.properties.ISO_A2)?.toUpperCase();
 
-      return featureIso2 === countryId; // countryId is already uppercase from mappedCountries
+      return featureIso2 === countryId;
     });
 
-    if (countryFeature && onCountryClick) {
+    if (!countryFeature) {
+      console.error(`No feature found for country ID: ${countryId}`);
+      return;
+    }
+
+    if (onCountryClick) {
       const enhancedFeature = {
         ...countryFeature,
         properties: {
           ...countryFeature.properties,
-          translatedName: gameCountryMap[countryId],
+          translatedName: gameCountryMap[countryId] || countryFeature.properties.name,
+          ISO_A2: countryId,
         },
       };
 
+      console.log("Sending enhanced feature:", enhancedFeature);
       onCountryClick(enhancedFeature);
     }
   };
