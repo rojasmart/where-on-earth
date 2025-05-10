@@ -39,6 +39,9 @@ const styles = {
     backgroundColor: "#f4f4f4",
     padding: "20px",
     overflowY: "auto" as const,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
   },
   rightPanel: {
     flex: 2,
