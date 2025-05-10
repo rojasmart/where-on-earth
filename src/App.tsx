@@ -17,7 +17,7 @@ function App() {
         <Questions registerClickHandler={registerCountryClickHandler} />
       </div>
       <div style={styles.rightPanel}>
-        <Globe pinCoordinates={pinCoordinates} onCountryClick={onCountryClickHandler} />
+        <Globe pinCoordinates={pinCoordinates} onCountryClick={onCountryClickHandler ?? undefined} />{" "}
       </div>
     </div>
   );
