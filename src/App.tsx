@@ -6,6 +6,7 @@ function App() {
   const [pinCoordinates, setPinCoordinates] = useState<[number, number] | null>(null);
   const [onCountryClickHandler, setOnCountryClickHandler] = useState<((country: any) => void) | null>(null);
   const [score, setScore] = useState(0);
+  const [clickedCountry, setClickedCountry] = useState<string | null>(null);
 
   // Function to receive the click handler from Questions component
   const registerCountryClickHandler = (handler: (country: any) => void) => {
@@ -20,10 +21,15 @@ function App() {
   return (
     <div style={styles.container}>
       <div style={styles.leftPanel}>
-        <Questions registerClickHandler={registerCountryClickHandler} score={score} />
+        <Questions registerClickHandler={registerCountryClickHandler} score={score} onClickedCountryChange={setClickedCountry} />
       </div>
       <div style={styles.rightPanel}>
-        <Globe pinCoordinates={pinCoordinates} onCountryClick={onCountryClickHandler ?? undefined} onScoreUpdate={onScoreUpdate} />
+        <Globe
+          pinCoordinates={pinCoordinates}
+          onCountryClick={onCountryClickHandler ?? undefined}
+          onScoreUpdate={onScoreUpdate}
+          highlightedCountry={clickedCountry}
+        />
       </div>
     </div>
   );

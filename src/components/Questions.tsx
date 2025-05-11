@@ -82,9 +82,11 @@ const countries: Country[] = [
 export default function Questions({
   registerClickHandler,
   score,
+  onClickedCountryChange,
 }: {
   registerClickHandler: (handler: (country: any) => void) => void;
   score: number;
+  onClickedCountryChange: (code: string | null) => void; // Add this type
 }) {
   const [correctCountry, setCorrectCountry] = useState<Country | null>(null);
   const [clickedCountry, setClickedCountry] = useState<string | null>(null);
@@ -111,12 +113,14 @@ export default function Questions({
     setGameStage("flag");
     setInstruction("Que país pertence a esta bandeira?");
     setClickedCountry(null);
+    onClickedCountryChange(null); // Add this line
   };
 
   const handleAnswer = (selectedCountry: Country) => {
     if (gameStage !== "flag") return;
 
     setClickedCountry(selectedCountry.code);
+    onClickedCountryChange(selectedCountry.code); // Add this line
 
     if (selectedCountry.code === correctCountry?.code) {
       setGameStage("map");

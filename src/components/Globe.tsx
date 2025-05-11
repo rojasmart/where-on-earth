@@ -9,10 +9,12 @@ export default function Globe({
   pinCoordinates,
   onCountryClick,
   onScoreUpdate,
+  highlightedCountry,
 }: {
   pinCoordinates: [number, number] | null;
   onCountryClick?: (country: any) => void;
   onScoreUpdate?: (newScore: number) => void;
+  highlightedCountry?: string | null;
 }) {
   const [geoData, setGeoData] = useState(null);
   const [pinPosition, setPinPosition] = useState<THREE.Vector3 | null>(null);
@@ -47,6 +49,7 @@ export default function Globe({
           geoData={geoData}
           onCountryClick={onCountryClick} // Passa o handler de clique
           onScoreUpdate={onScoreUpdate} // Passa a função para atualizar o score
+          highlightedCountry={highlightedCountry} // Passa o país destacado
         />
       )}
       {pinPosition && (

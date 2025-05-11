@@ -6,10 +6,12 @@ export default function GeoJsonLayer({
   geoData,
   onCountryClick,
   onScoreUpdate,
+  highlightedCountry,
 }: {
   geoData: any;
   onCountryClick?: (country: any) => void;
   onScoreUpdate?: (newScore: number) => void; // Nova prop para atualizar o score
+  highlightedCountry?: string | null; // Adiciona prop para país destacado
 }) {
   const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
@@ -259,6 +261,9 @@ export default function GeoJsonLayer({
     }
 
     setSelectedCountry(countryId);
+
+    console.log("highlightedCountry", highlightedCountry);
+    console.log("countryId", countryId);
 
     const countryFeature = geoData.features.find((feature) => {
       if (!feature?.properties) return false;
