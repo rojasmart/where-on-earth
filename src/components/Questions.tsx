@@ -81,12 +81,10 @@ const countries: Country[] = [
 
 export default function Questions({
   registerClickHandler,
-  onGenerateQuestion,
-  onScoreUpdate,
+  handleScoreUpdate,
 }: {
   registerClickHandler: (handler: (country: any) => void) => void;
-  onGenerateQuestion: () => void;
-  onScoreUpdate: (newScore: number) => void;
+  handleScoreUpdate: (newScore: number) => void;
 }) {
   const [correctCountry, setCorrectCountry] = useState<Country | null>(null);
   const [clickedCountry, setClickedCountry] = useState<string | null>(null);
@@ -95,16 +93,17 @@ export default function Questions({
   const [wrongCount, setWrongCount] = useState(0);
   const [gameStage, setGameStage] = useState<"flag" | "map">("flag");
   const [instruction, setInstruction] = useState<string>("");
+  const [score, setScore] = useState(0); // Mova o estado score para cá
 
   useEffect(() => {
     generateQuestion();
   }, []);
 
+  // Atualiza a pergunta sempre que o score mudar
   useEffect(() => {
-    if (gameStage === "map" && correctCountry) {
-      registerClickHandler(onCountryClick);
-    }
-  }, [correctCountry, gameStage]);
+    console.log("hello");
+    generateQuestion();
+  }, [score]);
 
   const generateQuestion = () => {
     const shuffledCountries = [...countries].sort(() => Math.random() - 0.5);
@@ -125,9 +124,8 @@ export default function Questions({
       setGameStage("map");
       setInstruction(`Agora clique no mapa onde fica ${correctCountry.name}`);
     } else {
-      setWrongCount((prev) => prev + 1);
       alert(`Incorreto! A bandeira pertence a ${correctCountry?.name}`);
-      onGenerateQuestion(); // Chama a função para gerar uma nova pergunta
+      updateScore(1); // Atualiza o score
     }
   };
 
@@ -141,7 +139,7 @@ export default function Questions({
       setCorrectCount((prev) => prev + 1);
       alert(`Parabéns! Você acertou a localização de ${correctCountry.name}!`);
       onScoreUpdate(correctCount + 1); // Atualiza o score
-      onGenerateQuestion(); // Gera uma nova pergunta
+      generateQuestion(); // Reseta a pergunta
       setGameStage("flag");
     } else {
       setWrongCount((prev) => prev + 1);
@@ -150,6 +148,19 @@ export default function Questions({
     }
   };
 
+  const updateScore = (increment: number) => {
+    setScore((prevScore) => {
+      const newScore = prevScore + increment;
+      handleScoreUpdate(newScore); // Chama o handleScoreUpdate do App
+      return newScore;
+    });
+  };
+
+  useEffect(() => {
+    if (gameStage === "map" && correctCountry) {
+      registerClickHandler(onCountryClick);
+    }
+  }, [correctCountry, gameStage]);
   return (
     <div className="quiz-container" style={styles.container}>
       {correctCountry && (

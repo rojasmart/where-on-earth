@@ -5,12 +5,12 @@ import * as THREE from "three";
 export default function GeoJsonLayer({
   geoData,
   onCountryClick,
-  onGenerateQuestion,
+
   onScoreUpdate,
 }: {
   geoData: any;
   onCountryClick?: (country: any) => void;
-  onGenerateQuestion?: () => void;
+
   onScoreUpdate?: (newScore: number) => void; // Nova prop para atualizar o score
 }) {
   const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
@@ -280,14 +280,15 @@ export default function GeoJsonLayer({
       setScore((prevScore) => {
         const newScore = prevScore + 1;
         if (onScoreUpdate) {
-          onScoreUpdate(newScore); // Notifica o Questions sobre a atualização do score
+          onScoreUpdate(newScore); // Atualiza o score
         }
         return newScore;
       });
 
-      if (onGenerateQuestion) {
-        onGenerateQuestion(); // Gera uma nova pergunta
-      }
+      // Gera uma nova pergunta apenas se o clique for correto
+    } else {
+      // Caso o clique esteja incorreto, você pode adicionar lógica adicional aqui
+      console.warn("Incorrect country clicked");
     }
 
     if (onCountryClick) {

@@ -8,12 +8,12 @@ import GeoJsonLayer from "./GeoJsonLayer";
 export default function Globe({
   pinCoordinates,
   onCountryClick,
-  onGenerateQuestion,
+
   onScoreUpdate,
 }: {
   pinCoordinates: [number, number] | null;
   onCountryClick?: (country: any) => void;
-  onGenerateQuestion?: () => void;
+
   onScoreUpdate?: (newScore: number) => void;
 }) {
   const [geoData, setGeoData] = useState(null);
@@ -48,7 +48,6 @@ export default function Globe({
         <GeoJsonLayer
           geoData={geoData}
           onCountryClick={onCountryClick} // Passa o handler de clique
-          onGenerateQuestion={onGenerateQuestion} // Passa a função para gerar perguntas
           onScoreUpdate={onScoreUpdate} // Passa a função para atualizar o score
         />
       )}
