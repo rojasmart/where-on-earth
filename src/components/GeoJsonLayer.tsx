@@ -267,6 +267,7 @@ export default function GeoJsonLayer({
 
       return featureIso2 === countryId;
     });
+    console.log("countryFeature", countryFeature);
 
     if (!countryFeature) {
       console.error(`No feature found for country ID: ${countryId}`);
@@ -274,6 +275,7 @@ export default function GeoJsonLayer({
     }
 
     const featureIso2 = (countryFeature.properties["ISO3166-1-Alpha-2"] || countryFeature.properties.ISO_A2)?.toUpperCase();
+
     if (featureIso2 === countryId) {
       setScore((prevScore) => {
         const newScore = prevScore + 1;
