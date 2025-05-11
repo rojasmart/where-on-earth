@@ -81,10 +81,10 @@ const countries: Country[] = [
 
 export default function Questions({
   registerClickHandler,
-  handleScoreUpdate,
+  score,
 }: {
   registerClickHandler: (handler: (country: any) => void) => void;
-  handleScoreUpdate: (newScore: number) => void;
+  score: number;
 }) {
   const [correctCountry, setCorrectCountry] = useState<Country | null>(null);
   const [clickedCountry, setClickedCountry] = useState<string | null>(null);
@@ -93,7 +93,6 @@ export default function Questions({
   const [wrongCount, setWrongCount] = useState(0);
   const [gameStage, setGameStage] = useState<"flag" | "map">("flag");
   const [instruction, setInstruction] = useState<string>("");
-  const [score, setScore] = useState(0); // Mova o estado score para cá
 
   useEffect(() => {
     generateQuestion();
@@ -101,7 +100,6 @@ export default function Questions({
 
   // Atualiza a pergunta sempre que o score mudar
   useEffect(() => {
-    console.log("hello");
     generateQuestion();
   }, [score]);
 
@@ -138,7 +136,9 @@ export default function Questions({
     if (clickedIso2 === correctCountry.code) {
       setCorrectCount((prev) => prev + 1);
       alert(`Parabéns! Você acertou a localização de ${correctCountry.name}!`);
-      onScoreUpdate(correctCount + 1); // Atualiza o score
+      const newScore = correctCount + 1;
+      setScore(newScore); // Atualiza o estado local do score
+      onScoreUpdate(newScore); // Chama o onScoreUpdate do App
       generateQuestion(); // Reseta a pergunta
       setGameStage("flag");
     } else {
@@ -151,7 +151,7 @@ export default function Questions({
   const updateScore = (increment: number) => {
     setScore((prevScore) => {
       const newScore = prevScore + increment;
-      handleScoreUpdate(newScore); // Chama o handleScoreUpdate do App
+      onScoreUpdate(newScore); // Chama o onScoreUpdate do App
       return newScore;
     });
   };
@@ -161,6 +161,7 @@ export default function Questions({
       registerClickHandler(onCountryClick);
     }
   }, [correctCountry, gameStage]);
+
   return (
     <div className="quiz-container" style={styles.container}>
       {correctCountry && (

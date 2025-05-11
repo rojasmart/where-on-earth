@@ -5,28 +5,25 @@ import Questions from "./components/Questions";
 function App() {
   const [pinCoordinates, setPinCoordinates] = useState<[number, number] | null>(null);
   const [onCountryClickHandler, setOnCountryClickHandler] = useState<((country: any) => void) | null>(null);
+  const [score, setScore] = useState(0);
 
   // Function to receive the click handler from Questions component
   const registerCountryClickHandler = (handler: (country: any) => void) => {
     setOnCountryClickHandler(handler);
   };
 
-  // Function to handle score updates
-  const handleScoreUpdate = (newScore: number) => {
-    console.log("Score updated:", newScore);
+  // Função para atualizar o score
+  const onScoreUpdate = (newScore: number) => {
+    setScore(newScore); // Atualiza o estado do score
   };
 
   return (
     <div style={styles.container}>
       <div style={styles.leftPanel}>
-        <Questions registerClickHandler={registerCountryClickHandler} handleScoreUpdate={handleScoreUpdate} />
+        <Questions registerClickHandler={registerCountryClickHandler} score={score} />
       </div>
       <div style={styles.rightPanel}>
-        <Globe
-          pinCoordinates={pinCoordinates}
-          onCountryClick={onCountryClickHandler ?? undefined}
-          onScoreUpdate={handleScoreUpdate} // Passa para o Globe
-        />
+        <Globe pinCoordinates={pinCoordinates} onCountryClick={onCountryClickHandler ?? undefined} onScoreUpdate={onScoreUpdate} />
       </div>
     </div>
   );

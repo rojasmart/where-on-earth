@@ -8,12 +8,10 @@ import GeoJsonLayer from "./GeoJsonLayer";
 export default function Globe({
   pinCoordinates,
   onCountryClick,
-
   onScoreUpdate,
 }: {
   pinCoordinates: [number, number] | null;
   onCountryClick?: (country: any) => void;
-
   onScoreUpdate?: (newScore: number) => void;
 }) {
   const [geoData, setGeoData] = useState(null);

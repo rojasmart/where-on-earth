@@ -5,12 +5,10 @@ import * as THREE from "three";
 export default function GeoJsonLayer({
   geoData,
   onCountryClick,
-
   onScoreUpdate,
 }: {
   geoData: any;
   onCountryClick?: (country: any) => void;
-
   onScoreUpdate?: (newScore: number) => void; // Nova prop para atualizar o score
 }) {
   const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
