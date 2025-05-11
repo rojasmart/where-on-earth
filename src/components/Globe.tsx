@@ -8,9 +8,13 @@ import GeoJsonLayer from "./GeoJsonLayer";
 export default function Globe({
   pinCoordinates,
   onCountryClick,
+  onGenerateQuestion,
+  onScoreUpdate,
 }: {
   pinCoordinates: [number, number] | null;
   onCountryClick?: (country: any) => void;
+  onGenerateQuestion?: () => void;
+  onScoreUpdate?: (newScore: number) => void;
 }) {
   const [geoData, setGeoData] = useState(null);
   const [pinPosition, setPinPosition] = useState<THREE.Vector3 | null>(null);
@@ -43,7 +47,9 @@ export default function Globe({
       {geoData && (
         <GeoJsonLayer
           geoData={geoData}
-          onCountryClick={onCountryClick} // Certifique-se de passar a função aqui
+          onCountryClick={onCountryClick} // Passa o handler de clique
+          onGenerateQuestion={onGenerateQuestion} // Passa a função para gerar perguntas
+          onScoreUpdate={onScoreUpdate} // Passa a função para atualizar o score
         />
       )}
       {pinPosition && (

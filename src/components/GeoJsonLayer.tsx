@@ -2,9 +2,20 @@ import { useMemo, useState, useEffect } from "react";
 import { Line } from "@react-three/drei";
 import * as THREE from "three";
 
-export default function GeoJsonLayer({ geoData, onCountryClick }: { geoData: any; onCountryClick?: (country: any) => void }) {
+export default function GeoJsonLayer({
+  geoData,
+  onCountryClick,
+  onGenerateQuestion,
+  onScoreUpdate,
+}: {
+  geoData: any;
+  onCountryClick?: (country: any) => void;
+  onGenerateQuestion?: () => void;
+  onScoreUpdate?: (newScore: number) => void; // Nova prop para atualizar o score
+}) {
   const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
+  const [score, setScore] = useState(0);
 
   const gameCountryMap = {
     FR: "França",
@@ -264,6 +275,21 @@ export default function GeoJsonLayer({ geoData, onCountryClick }: { geoData: any
       return;
     }
 
+    const featureIso2 = (countryFeature.properties["ISO3166-1-Alpha-2"] || countryFeature.properties.ISO_A2)?.toUpperCase();
+    if (featureIso2 === countryId) {
+      setScore((prevScore) => {
+        const newScore = prevScore + 1;
+        if (onScoreUpdate) {
+          onScoreUpdate(newScore); // Notifica o Questions sobre a atualização do score
+        }
+        return newScore;
+      });
+
+      if (onGenerateQuestion) {
+        onGenerateQuestion(); // Gera uma nova pergunta
+      }
+    }
+
     if (onCountryClick) {
       const enhancedFeature = {
         ...countryFeature,
@@ -274,7 +300,6 @@ export default function GeoJsonLayer({ geoData, onCountryClick }: { geoData: any
         },
       };
 
-      console.log("Sending enhanced feature:", enhancedFeature);
       onCountryClick(enhancedFeature);
     }
   };

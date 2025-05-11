@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 
 interface Country {
   name: string;
@@ -79,7 +79,15 @@ const countries: Country[] = [
   { name: "Antígua e Barbuda", code: "AG" },
 ];
 
-export default function Questions({ registerClickHandler }: { registerClickHandler: (handler: (country: any) => void) => void }) {
+export default function Questions({
+  registerClickHandler,
+  onGenerateQuestion,
+  onScoreUpdate,
+}: {
+  registerClickHandler: (handler: (country: any) => void) => void;
+  onGenerateQuestion: () => void;
+  onScoreUpdate: (newScore: number) => void;
+}) {
   const [correctCountry, setCorrectCountry] = useState<Country | null>(null);
   const [clickedCountry, setClickedCountry] = useState<string | null>(null);
   const [options, setOptions] = useState<Country[]>([]);
@@ -111,7 +119,7 @@ export default function Questions({ registerClickHandler }: { registerClickHandl
   const handleAnswer = (selectedCountry: Country) => {
     if (gameStage !== "flag") return;
 
-    setClickedCountry(selectedCountry.code); // Usa o código ISO2
+    setClickedCountry(selectedCountry.code);
 
     if (selectedCountry.code === correctCountry?.code) {
       setGameStage("map");
@@ -119,7 +127,7 @@ export default function Questions({ registerClickHandler }: { registerClickHandl
     } else {
       setWrongCount((prev) => prev + 1);
       alert(`Incorreto! A bandeira pertence a ${correctCountry?.name}`);
-      generateQuestion();
+      onGenerateQuestion(); // Chama a função para gerar uma nova pergunta
     }
   };
 
@@ -132,8 +140,9 @@ export default function Questions({ registerClickHandler }: { registerClickHandl
     if (clickedIso2 === correctCountry.code) {
       setCorrectCount((prev) => prev + 1);
       alert(`Parabéns! Você acertou a localização de ${correctCountry.name}!`);
-      generateQuestion();
-      setGameStage("flag"); // Volta ao modo bandeira
+      onScoreUpdate(correctCount + 1); // Atualiza o score
+      onGenerateQuestion(); // Gera uma nova pergunta
+      setGameStage("flag");
     } else {
       setWrongCount((prev) => prev + 1);
       const clickedName = countryFeature.properties.translatedName || countryFeature.properties.name || clickedIso2;

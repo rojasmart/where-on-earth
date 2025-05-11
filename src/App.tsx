@@ -6,18 +6,37 @@ function App() {
   const [pinCoordinates, setPinCoordinates] = useState<[number, number] | null>(null);
   const [onCountryClickHandler, setOnCountryClickHandler] = useState<((country: any) => void) | null>(null);
 
+  const [score, setScore] = useState(0);
+
   // Function to receive the click handler from Questions component
   const registerCountryClickHandler = (handler: (country: any) => void) => {
     setOnCountryClickHandler(handler);
   };
 
+  // Function to handle generating a new question
+  const handleGenerateQuestion = () => {
+    console.log("Generating a new question...");
+    // Adicione lógica para gerar uma nova pergunta, se necessário
+  };
+
+  // Function to handle score updates
+  const handleScoreUpdate = (newScore: number) => {
+    console.log("Updating score:", newScore);
+    setScore(newScore);
+  };
+
   return (
     <div style={styles.container}>
       <div style={styles.leftPanel}>
-        <Questions registerClickHandler={registerCountryClickHandler} />
+        <Questions registerClickHandler={registerCountryClickHandler} onGenerateQuestion={handleGenerateQuestion} onScoreUpdate={handleScoreUpdate} />
       </div>
       <div style={styles.rightPanel}>
-        <Globe pinCoordinates={pinCoordinates} onCountryClick={onCountryClickHandler ?? undefined} />{" "}
+        <Globe
+          pinCoordinates={pinCoordinates}
+          onCountryClick={onCountryClickHandler ?? undefined}
+          onGenerateQuestion={handleGenerateQuestion} // Passa para o Globe
+          onScoreUpdate={handleScoreUpdate} // Passa para o Globe
+        />
       </div>
     </div>
   );
