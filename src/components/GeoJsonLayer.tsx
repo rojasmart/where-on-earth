@@ -262,9 +262,6 @@ export default function GeoJsonLayer({
 
     setSelectedCountry(countryId);
 
-    console.log("highlightedCountry", highlightedCountry);
-    console.log("countryId", countryId);
-
     const countryFeature = geoData.features.find((feature) => {
       if (!feature?.properties) return false;
 
@@ -278,6 +275,8 @@ export default function GeoJsonLayer({
       console.error(`No feature found for country ID: ${countryId}`);
       return;
     }
+
+    //HighlightedCountry is the same as CountryId
 
     const featureIso2 = (countryFeature.properties["ISO3166-1-Alpha-2"] || countryFeature.properties.ISO_A2)?.toUpperCase();
 
