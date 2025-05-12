@@ -96,6 +96,8 @@ export default function Questions({
   const [gameStage, setGameStage] = useState<"flag" | "map">("flag");
   const [instruction, setInstruction] = useState<string>("");
 
+  const [attempts, setAttempts] = useState(3);
+
   useEffect(() => {
     generateQuestion();
   }, []);
@@ -113,7 +115,8 @@ export default function Questions({
     setGameStage("flag");
     setInstruction("Que país pertence a esta bandeira?");
     setClickedCountry(null);
-    onClickedCountryChange(null); // Add this line
+    onClickedCountryChange(null);
+    setAttempts(3); // Reset attempts for new question
   };
 
   const handleAnswer = (selectedCountry: Country) => {
@@ -125,8 +128,17 @@ export default function Questions({
     if (selectedCountry.code === correctCountry?.code) {
       setGameStage("map");
       setInstruction(`Agora clique no mapa onde fica ${correctCountry.name}`);
+      setAttempts(3); // Reset attempts for next question
     } else {
-      alert(`Incorreto! A bandeira pertence a ${correctCountry?.name}`);
+      setAttempts((prev) => prev - 1);
+      if (attempts > 1) {
+        alert(`Incorreto! Você ainda tem ${attempts - 1} tentativas.`);
+      } else {
+        alert(`Você esgotou suas tentativas! A resposta correta era ${correctCountry?.name}`);
+        setScore(0); // Reset score
+        generateQuestion(); // Get new question
+        setAttempts(3); // Reset attempts
+      }
     }
   };
 
