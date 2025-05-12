@@ -182,10 +182,6 @@ export default function Questions({
             <p>Corretas: {score}</p>
             <p>Erradas: {wrongCount}</p>
           </div>
-          <div className="quiz-clicked-country">
-            <h3>País Selecionado:</h3>
-            <p>{clickedCountry || "Nenhum país selecionado"}</p>
-          </div>
         </>
       )}
     </div>
