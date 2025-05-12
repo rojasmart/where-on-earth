@@ -269,7 +269,6 @@ export default function GeoJsonLayer({
 
       return featureIso2 === countryId;
     });
-    console.log("countryFeature", countryFeature);
 
     if (!countryFeature) {
       console.error(`No feature found for country ID: ${countryId}`);
@@ -280,19 +279,16 @@ export default function GeoJsonLayer({
 
     const featureIso2 = (countryFeature.properties["ISO3166-1-Alpha-2"] || countryFeature.properties.ISO_A2)?.toUpperCase();
 
-    if (featureIso2 === countryId) {
+    if (highlightedCountry === countryId) {
       setScore((prevScore) => {
         const newScore = prevScore + 1;
         if (onScoreUpdate) {
-          onScoreUpdate(newScore); // Atualiza o score
+          onScoreUpdate(newScore);
         }
         return newScore;
       });
-
-      // Gera uma nova pergunta apenas se o clique for correto
     } else {
-      // Caso o clique esteja incorreto, você pode adicionar lógica adicional aqui
-      console.warn("Incorrect country clicked");
+      alert(`Wrong country! Try to find ${gameCountryMap[highlightedCountry] || highlightedCountry}`);
     }
 
     if (onCountryClick) {
@@ -309,6 +305,7 @@ export default function GeoJsonLayer({
     }
   };
 
+  console.log("score", score);
   return (
     <>
       {countries.length > 0 ? (

@@ -127,7 +127,6 @@ export default function Questions({
       setInstruction(`Agora clique no mapa onde fica ${correctCountry.name}`);
     } else {
       alert(`Incorreto! A bandeira pertence a ${correctCountry?.name}`);
-      updateScore(1); // Atualiza o score
     }
   };
 
@@ -141,8 +140,7 @@ export default function Questions({
       setCorrectCount((prev) => prev + 1);
       alert(`Parabéns! Você acertou a localização de ${correctCountry.name}!`);
       const newScore = correctCount + 1;
-      setScore(newScore); // Atualiza o estado local do score
-      onScoreUpdate(newScore); // Chama o onScoreUpdate do App
+
       generateQuestion(); // Reseta a pergunta
       setGameStage("flag");
     } else {
@@ -150,14 +148,6 @@ export default function Questions({
       const clickedName = countryFeature.properties.translatedName || countryFeature.properties.name || clickedIso2;
       alert(`Incorreto! Você clicou em ${clickedName}, mas a resposta correta é ${correctCountry.name}`);
     }
-  };
-
-  const updateScore = (increment: number) => {
-    setScore((prevScore) => {
-      const newScore = prevScore + increment;
-      onScoreUpdate(newScore); // Chama o onScoreUpdate do App
-      return newScore;
-    });
   };
 
   useEffect(() => {
@@ -190,7 +180,7 @@ export default function Questions({
           {gameStage === "map" && <div style={styles.mapInstruction}>Clique no país correto no mapa!</div>}
 
           <div style={styles.score}>
-            <p>Corretas: {correctCount}</p>
+            <p>Corretas: {score}</p>
             <p>Erradas: {wrongCount}</p>
           </div>
           <div style={styles.clickedCountry}>
