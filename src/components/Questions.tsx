@@ -139,7 +139,6 @@ export default function Questions({
     if (clickedIso2 === correctCountry.code) {
       setCorrectCount((prev) => prev + 1);
       alert(`Parabéns! Você acertou a localização de ${correctCountry.name}!`);
-      const newScore = correctCount + 1;
 
       generateQuestion(); // Reseta a pergunta
       setGameStage("flag");
@@ -157,33 +156,33 @@ export default function Questions({
   }, [correctCountry, gameStage]);
 
   return (
-    <div className="quiz-container" style={styles.container}>
+    <div className="quiz-container">
       {correctCountry && (
         <>
           <img
             src={`https://flagcdn.com/h240/${correctCountry.code.toLowerCase()}.png`}
             alt={`Bandeira de ${correctCountry.name}`}
-            style={styles.flag}
+            className="quiz-flag"
           />
-          <p style={styles.question}>{instruction}</p>
+          <p className="quiz-question">{instruction}</p>
 
           {gameStage === "flag" && (
-            <div style={styles.options}>
+            <div className="quiz-options">
               {options.map((country) => (
-                <button key={country.code} onClick={() => handleAnswer(country)} style={styles.optionButton}>
+                <button key={country.code} onClick={() => handleAnswer(country)} className="quiz-option-button">
                   {country.name}
                 </button>
               ))}
             </div>
           )}
 
-          {gameStage === "map" && <div style={styles.mapInstruction}>Clique no país correto no mapa!</div>}
+          {gameStage === "map" && <div className="quiz-map-instruction">Clique no país correto no mapa!</div>}
 
-          <div style={styles.score}>
+          <div className="quiz-score">
             <p>Corretas: {score}</p>
             <p>Erradas: {wrongCount}</p>
           </div>
-          <div style={styles.clickedCountry}>
+          <div className="quiz-clicked-country">
             <h3>País Selecionado:</h3>
             <p>{clickedCountry || "Nenhum país selecionado"}</p>
           </div>
@@ -192,62 +191,3 @@ export default function Questions({
     </div>
   );
 }
-
-const styles = {
-  container: {
-    display: "flex",
-    flexDirection: "column" as const,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: "20px",
-    border: "1px solid #ccc",
-    borderRadius: "8px",
-    backgroundColor: "#f9f9f9",
-    width: "400px",
-    textAlign: "center" as const,
-  },
-  flag: {
-    width: "150px",
-    height: "auto",
-    marginBottom: "20px",
-  },
-  question: {
-    fontSize: "18px",
-    fontWeight: "bold" as const,
-    marginBottom: "20px",
-    color: "#333",
-  },
-  options: {
-    display: "flex",
-    flexDirection: "column" as const,
-    gap: "10px",
-  },
-  optionButton: {
-    padding: "10px 20px",
-    fontSize: "16px",
-    cursor: "pointer",
-    border: "1px solid #ccc",
-    borderRadius: "5px",
-    backgroundColor: "#fff",
-    color: "#333",
-    transition: "background-color 0.3s, color 0.3s",
-  },
-  mapInstruction: {
-    padding: "10px",
-    backgroundColor: "#e0f7fa",
-    borderRadius: "5px",
-    border: "1px solid #4fc3f7",
-    color: "#0277bd",
-    marginBottom: "20px",
-  },
-  score: {
-    marginTop: "20px",
-    fontSize: "16px",
-    color: "#333",
-  },
-  clickedCountry: {
-    marginTop: "20px",
-    fontSize: "16px",
-    color: "#333",
-  },
-};

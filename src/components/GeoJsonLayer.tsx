@@ -277,8 +277,6 @@ export default function GeoJsonLayer({
 
     //HighlightedCountry is the same as CountryId
 
-    const featureIso2 = (countryFeature.properties["ISO3166-1-Alpha-2"] || countryFeature.properties.ISO_A2)?.toUpperCase();
-
     if (highlightedCountry === countryId) {
       setScore((prevScore) => {
         const newScore = prevScore + 1;
@@ -305,7 +303,6 @@ export default function GeoJsonLayer({
     }
   };
 
-  console.log("score", score);
   return (
     <>
       {countries.length > 0 ? (
