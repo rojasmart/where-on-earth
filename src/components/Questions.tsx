@@ -83,20 +83,24 @@ export default function Questions({
   registerClickHandler,
   score,
   onClickedCountryChange,
+  onScoreReset,
+  incrementScore,
 }: {
   registerClickHandler: (handler: (country: any) => void) => void;
   score: number;
-  onClickedCountryChange: (code: string | null) => void; // Add this type
+  onClickedCountryChange: (code: string | null) => void;
+  onScoreReset: () => void;
+  incrementScore: () => void;
 }) {
   const [correctCountry, setCorrectCountry] = useState<Country | null>(null);
   const [clickedCountry, setClickedCountry] = useState<string | null>(null);
   const [options, setOptions] = useState<Country[]>([]);
-  const [correctCount, setCorrectCount] = useState(0);
   const [wrongCount, setWrongCount] = useState(0);
   const [gameStage, setGameStage] = useState<"flag" | "map">("flag");
   const [instruction, setInstruction] = useState<string>("");
-
   const [attempts, setAttempts] = useState(3);
+  const [scoreAnimating, setScoreAnimating] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
     generateQuestion();
@@ -118,15 +122,16 @@ export default function Questions({
     onClickedCountryChange(null);
     setAttempts(3); // Reset attempts for new question
   };
-
   const handleAnswer = (selectedCountry: Country) => {
     if (gameStage !== "flag") return;
 
     setClickedCountry(selectedCountry.code);
-    onClickedCountryChange(selectedCountry.code); // Add this line
+    onClickedCountryChange(selectedCountry.code);
 
     if (selectedCountry.code === correctCountry?.code) {
       setGameStage("map");
+      setSuccessMessage(`Correto! Agora encontre ${correctCountry.name} no mapa.`);
+      setTimeout(() => setSuccessMessage(null), 2000); // Remove message after 2 seconds
       setInstruction(`Agora clique no mapa onde fica ${correctCountry.name}`);
       setAttempts(3); // Reset attempts for next question
     } else {
@@ -135,25 +140,36 @@ export default function Questions({
         alert(`Incorreto! Você ainda tem ${attempts - 1} tentativas.`);
       } else {
         alert(`Você esgotou suas tentativas! A resposta correta era ${correctCountry?.name}`);
-        setScore(0); // Reset score
+        onScoreReset(); // Zerar o score
         generateQuestion(); // Get new question
         setAttempts(3); // Reset attempts
       }
     }
   };
-
   const onCountryClick = (countryFeature: any) => {
     if (!countryFeature || !countryFeature.properties) return;
     if (gameStage !== "map" || !correctCountry) return;
 
     const clickedIso2 = (countryFeature.properties["ISO3166-1-Alpha-2"] || countryFeature.properties.ISO_A2)?.toUpperCase();
-
     if (clickedIso2 === correctCountry.code) {
-      setCorrectCount((prev) => prev + 1);
-      alert(`Parabéns! Você acertou a localização de ${correctCountry.name}!`);
+      // Incrementar o contador de acertos
+      incrementScore();
 
-      generateQuestion(); // Reseta a pergunta
-      setGameStage("flag");
+      // Mostrar mensagem de sucesso em vez de alert
+      setSuccessMessage(`Parabéns! Você acertou a localização de ${correctCountry.name}!`);
+
+      // Animação do score acontecerá
+      setScoreAnimating(true);
+
+      // Remover mensagem após 2 segundos
+      setTimeout(() => {
+        setSuccessMessage(null);
+        setScoreAnimating(false);
+
+        // Resetar pergunta e voltar para estágio flag
+        generateQuestion();
+        setGameStage("flag");
+      }, 2000);
     } else {
       setWrongCount((prev) => prev + 1);
       const clickedName = countryFeature.properties.translatedName || countryFeature.properties.name || clickedIso2;
@@ -166,7 +182,6 @@ export default function Questions({
       registerClickHandler(onCountryClick);
     }
   }, [correctCountry, gameStage]);
-
   return (
     <div className="quiz-container">
       {correctCountry && (
@@ -191,13 +206,16 @@ export default function Questions({
           {gameStage === "map" && <div className="quiz-map-instruction">Clique no país correto no mapa!</div>}
 
           <div className="quiz-score">
-            <p>Corretas: {score}</p>
+            <p>Tentativas restantes: {attempts}</p>
+            <p className={scoreAnimating ? "score-animate" : ""}>Corretas: {score}</p>
             <p>Erradas: {wrongCount}</p>
           </div>
           <div className="quiz-clicked-country">
             <h3>País Selecionado:</h3>
             <p>{clickedCountry || "Nenhum país selecionado"}</p>
           </div>
+
+          {successMessage && <div className="success-message">{successMessage}</div>}
         </>
       )}
     </div>
