@@ -110,14 +110,13 @@ export default function Questions({
   useEffect(() => {
     generateQuestion();
   }, [score]);
-
   const generateQuestion = () => {
     const shuffledCountries = [...countries].sort(() => Math.random() - 0.5);
     const correct = shuffledCountries[0];
     setCorrectCountry(correct);
     setOptions(shuffledCountries.slice(0, 3));
     setGameStage("flag");
-    setInstruction("Que país pertence a esta bandeira?");
+    setInstruction("A que país pertence esta bandeira? Tem 3 tentativas para completar o desafio.");
     setClickedCountry(null);
     onClickedCountryChange(null);
     setAttempts(3); // Reset attempts for new question
@@ -127,13 +126,11 @@ export default function Questions({
 
     setClickedCountry(selectedCountry.code);
     onClickedCountryChange(selectedCountry.code);
-
     if (selectedCountry.code === correctCountry?.code) {
       setGameStage("map");
       setSuccessMessage(`Correto! Agora encontre ${correctCountry.name} no mapa.`);
       setTimeout(() => setSuccessMessage(null), 2000); // Remove message after 2 seconds
-      setInstruction(`Agora clique no mapa onde fica ${correctCountry.name}`);
-      setAttempts(3); // Reset attempts for next question
+      setInstruction(`Agora clique no mapa onde fica ${correctCountry.name}. Você tem ${attempts} tentativa(s) restante(s).`);
     } else {
       setAttempts((prev) => prev - 1);
       if (attempts > 1) {
@@ -171,9 +168,20 @@ export default function Questions({
         setGameStage("flag");
       }, 2000);
     } else {
+      setAttempts((prev) => prev - 1);
       setWrongCount((prev) => prev + 1);
       const clickedName = countryFeature.properties.translatedName || countryFeature.properties.name || clickedIso2;
-      alert(`Incorreto! Você clicou em ${clickedName}, mas a resposta correta é ${correctCountry.name}`);
+
+      if (attempts > 1) {
+        alert(
+          `Incorreto! Você clicou em ${clickedName}, mas a resposta correta é ${correctCountry.name}. Você ainda tem ${attempts - 1} tentativa(s).`
+        );
+      } else {
+        alert(`Você esgotou suas tentativas! A resposta correta era ${correctCountry.name}`);
+        onScoreReset(); // Zerar o score
+        generateQuestion(); // Get new question
+        setAttempts(3); // Reset attempts
+      }
     }
   };
 
@@ -192,7 +200,6 @@ export default function Questions({
             className="quiz-flag"
           />
           <p className="quiz-question">{instruction}</p>
-
           {gameStage === "flag" && (
             <div className="quiz-options">
               {options.map((country) => (
@@ -202,11 +209,11 @@ export default function Questions({
               ))}
             </div>
           )}
-
-          {gameStage === "map" && <div className="quiz-map-instruction">Clique no país correto no mapa!</div>}
-
+          {gameStage === "map" && (
+            <div className="quiz-map-instruction">Clique no país correto no mapa! Você tem {attempts} tentativa(s) restante(s).</div>
+          )}{" "}
           <div className="quiz-score">
-            <p>Tentativas restantes: {attempts}</p>
+            <p>Tentativas restantes para completar o desafio: {attempts}</p>
             <p className={scoreAnimating ? "score-animate" : ""}>Corretas: {score}</p>
             <p>Erradas: {wrongCount}</p>
           </div>
@@ -214,7 +221,6 @@ export default function Questions({
             <h3>País Selecionado:</h3>
             <p>{clickedCountry || "Nenhum país selecionado"}</p>
           </div>
-
           {successMessage && <div className="success-message">{successMessage}</div>}
         </>
       )}
