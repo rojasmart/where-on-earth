@@ -29,7 +29,6 @@ function App() {
   return (
     <div style={styles.container}>
       <div style={styles.leftPanel}>
-        {" "}
         <Questions
           registerClickHandler={registerCountryClickHandler}
           score={score}

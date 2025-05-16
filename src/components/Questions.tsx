@@ -97,7 +97,7 @@ export default function Questions({
   const [correctCountry, setCorrectCountry] = useState<Country | null>(null);
   const [clickedCountry, setClickedCountry] = useState<string | null>(null);
   const [options, setOptions] = useState<Country[]>([]);
-  const [wrongCount, setWrongCount] = useState(0);
+
   const [gameStage, setGameStage] = useState<"flag" | "map">("flag");
   const [instruction, setInstruction] = useState<string>("");
   const [attempts, setAttempts] = useState(3);
@@ -106,12 +106,15 @@ export default function Questions({
   useEffect(() => {
     // Inicialização do jogo - definir tentativas apenas uma vez no início
     setAttempts(3);
+
     generateQuestion();
   }, []);
+
   // Atualiza a pergunta sempre que o score mudar
   useEffect(() => {
     generateQuestion();
   }, [score]);
+
   const generateQuestion = () => {
     const shuffledCountries = [...countries].sort(() => Math.random() - 0.5);
     const correct = shuffledCountries[0];
@@ -136,6 +139,8 @@ export default function Questions({
       setInstruction(`Agora clique no mapa onde fica ${correctCountry.name}. Você tem ${attempts} tentativa(s) restante(s).`);
     } else {
       setAttempts((prev) => prev - 1);
+      // Incrementar contador de erros
+
       // Decrementar o score quando errar na identificação da bandeira
       decrementScore();
       if (attempts > 1) {
@@ -143,6 +148,7 @@ export default function Questions({
       } else {
         alert(`Você esgotou suas tentativas! A resposta correta era ${correctCountry?.name}`);
         onScoreReset(); // Zerar o score
+
         generateQuestion(); // Get new question
         setAttempts(3); // Reset attempts apenas quando zerar o score
       }
@@ -174,7 +180,7 @@ export default function Questions({
       }, 2000);
     } else {
       setAttempts((prev) => prev - 1);
-      setWrongCount((prev) => prev + 1);
+
       // Decrementar o score quando errar no mapa
       decrementScore();
       const clickedName = countryFeature.properties.translatedName || countryFeature.properties.name || clickedIso2;
@@ -186,6 +192,7 @@ export default function Questions({
       } else {
         alert(`Você esgotou suas tentativas! A resposta correta era ${correctCountry.name}`);
         onScoreReset(); // Zerar o score
+
         generateQuestion(); // Get new question
         setAttempts(3); // Reset attempts apenas quando zerar o score
       }
@@ -222,7 +229,6 @@ export default function Questions({
           <div className="quiz-score">
             <p>Tentativas restantes para completar o desafio: {attempts}</p>
             <p className={scoreAnimating ? "score-animate" : ""}>Corretas: {score}</p>
-            <p>Erradas: {wrongCount}</p>
           </div>
           <div className="quiz-clicked-country">
             <h3>País Selecionado:</h3>
