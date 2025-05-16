@@ -17,20 +17,26 @@ function App() {
   const onScoreUpdate = (newScore: number) => {
     setScore(newScore); // Atualiza o estado do score
   };
-
   // Função para incrementar o score
   const incrementScore = () => {
     setScore((prevScore) => prevScore + 1);
   };
+
+  // Função para decrementar o score
+  const decrementScore = () => {
+    setScore((prevScore) => Math.max(0, prevScore - 1)); // Não permitir score negativo
+  };
   return (
     <div style={styles.container}>
       <div style={styles.leftPanel}>
+        {" "}
         <Questions
           registerClickHandler={registerCountryClickHandler}
           score={score}
           onClickedCountryChange={setClickedCountry}
           onScoreReset={() => setScore(0)}
           incrementScore={incrementScore}
+          decrementScore={decrementScore}
         />
       </div>
       <div style={styles.rightPanel}>

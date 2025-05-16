@@ -85,12 +85,14 @@ export default function Questions({
   onClickedCountryChange,
   onScoreReset,
   incrementScore,
+  decrementScore,
 }: {
   registerClickHandler: (handler: (country: any) => void) => void;
   score: number;
   onClickedCountryChange: (code: string | null) => void;
   onScoreReset: () => void;
   incrementScore: () => void;
+  decrementScore: () => void;
 }) {
   const [correctCountry, setCorrectCountry] = useState<Country | null>(null);
   const [clickedCountry, setClickedCountry] = useState<string | null>(null);
@@ -101,11 +103,11 @@ export default function Questions({
   const [attempts, setAttempts] = useState(3);
   const [scoreAnimating, setScoreAnimating] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-
   useEffect(() => {
+    // Inicialização do jogo - definir tentativas apenas uma vez no início
+    setAttempts(3);
     generateQuestion();
   }, []);
-
   // Atualiza a pergunta sempre que o score mudar
   useEffect(() => {
     generateQuestion();
@@ -119,7 +121,8 @@ export default function Questions({
     setInstruction("A que país pertence esta bandeira? Tem 3 tentativas para completar o desafio.");
     setClickedCountry(null);
     onClickedCountryChange(null);
-    setAttempts(3); // Reset attempts for new question
+    // Não resetar tentativas a cada nova pergunta, apenas quando o score é zerado
+    // O reset de tentativas acontecerá apenas quando o jogador esgotar todas as tentativas
   };
   const handleAnswer = (selectedCountry: Country) => {
     if (gameStage !== "flag") return;
@@ -133,13 +136,15 @@ export default function Questions({
       setInstruction(`Agora clique no mapa onde fica ${correctCountry.name}. Você tem ${attempts} tentativa(s) restante(s).`);
     } else {
       setAttempts((prev) => prev - 1);
+      // Decrementar o score quando errar na identificação da bandeira
+      decrementScore();
       if (attempts > 1) {
         alert(`Incorreto! Você ainda tem ${attempts - 1} tentativas.`);
       } else {
         alert(`Você esgotou suas tentativas! A resposta correta era ${correctCountry?.name}`);
         onScoreReset(); // Zerar o score
         generateQuestion(); // Get new question
-        setAttempts(3); // Reset attempts
+        setAttempts(3); // Reset attempts apenas quando zerar o score
       }
     }
   };
@@ -170,6 +175,8 @@ export default function Questions({
     } else {
       setAttempts((prev) => prev - 1);
       setWrongCount((prev) => prev + 1);
+      // Decrementar o score quando errar no mapa
+      decrementScore();
       const clickedName = countryFeature.properties.translatedName || countryFeature.properties.name || clickedIso2;
 
       if (attempts > 1) {
@@ -180,7 +187,7 @@ export default function Questions({
         alert(`Você esgotou suas tentativas! A resposta correta era ${correctCountry.name}`);
         onScoreReset(); // Zerar o score
         generateQuestion(); // Get new question
-        setAttempts(3); // Reset attempts
+        setAttempts(3); // Reset attempts apenas quando zerar o score
       }
     }
   };
