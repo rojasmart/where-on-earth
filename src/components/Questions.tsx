@@ -86,6 +86,8 @@ export default function Questions({
   onScoreReset,
   incrementScore,
   decrementScore,
+  attempts,
+  setAttempts,
 }: {
   registerClickHandler: (handler: (country: any) => void) => void;
   score: number;
@@ -93,6 +95,8 @@ export default function Questions({
   onScoreReset: () => void;
   incrementScore: () => void;
   decrementScore: () => void;
+  attempts: number;
+  setAttempts: (attempts: number) => void;
 }) {
   const [correctCountry, setCorrectCountry] = useState<Country | null>(null);
   const [clickedCountry, setClickedCountry] = useState<string | null>(null);
@@ -100,12 +104,16 @@ export default function Questions({
 
   const [gameStage, setGameStage] = useState<"flag" | "map">("flag");
   const [instruction, setInstruction] = useState<string>("");
-  const [attempts, setAttempts] = useState(3);
   const [scoreAnimating, setScoreAnimating] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   useEffect(() => {
     // Inicialização do jogo - definir tentativas apenas uma vez no início
-    setAttempts(3);
+    if (typeof setAttempts === "function") {
+      console.log("Inicializando tentativas para 3");
+      setAttempts(3);
+    } else {
+      console.warn("setAttempts não é uma função válida");
+    }
 
     generateQuestion();
   }, []);

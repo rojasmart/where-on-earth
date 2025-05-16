@@ -10,11 +10,15 @@ export default function Globe({
   onCountryClick,
   onScoreUpdate,
   highlightedCountry,
+  attempts,
+  onAttemptsUpdate,
 }: {
   pinCoordinates: [number, number] | null;
   onCountryClick?: (country: any) => void;
   onScoreUpdate?: (newScore: number) => void;
   highlightedCountry?: string | null;
+  attempts: number;
+  onAttemptsUpdate?: (newAttempts: number) => void;
 }) {
   const [geoData, setGeoData] = useState(null);
   const [pinPosition, setPinPosition] = useState<THREE.Vector3 | null>(null);
@@ -43,13 +47,15 @@ export default function Globe({
       <ambientLight intensity={4} />
       <directionalLight position={[5, 5, 5]} />
       <Stars />
-      <Earth />
+      <Earth />{" "}
       {geoData && (
         <GeoJsonLayer
           geoData={geoData}
           onCountryClick={onCountryClick} // Passa o handler de clique
           onScoreUpdate={onScoreUpdate} // Passa a função para atualizar o score
           highlightedCountry={highlightedCountry} // Passa o país destacado
+          attempts={attempts} // Passa as tentativas restantes
+          onAttemptsUpdate={onAttemptsUpdate} // Passa o método para atualizar as tentativas
         />
       )}
       {pinPosition && (

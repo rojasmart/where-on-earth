@@ -7,6 +7,7 @@ function App() {
   const [onCountryClickHandler, setOnCountryClickHandler] = useState<((country: any) => void) | null>(null);
   const [score, setScore] = useState(0);
   const [clickedCountry, setClickedCountry] = useState<string | null>(null);
+  const [attempts, setAttempts] = useState(3);
 
   // Function to receive the click handler from Questions component
   const registerCountryClickHandler = (handler: (country: any) => void) => {
@@ -36,14 +37,18 @@ function App() {
           onScoreReset={() => setScore(0)}
           incrementScore={incrementScore}
           decrementScore={decrementScore}
+          attempts={attempts}
+          setAttempts={setAttempts} // Certifique-se que isso está presente
         />
-      </div>
+      </div>{" "}
       <div style={styles.rightPanel}>
         <Globe
           pinCoordinates={pinCoordinates}
           onCountryClick={onCountryClickHandler ?? undefined}
           onScoreUpdate={onScoreUpdate}
           highlightedCountry={clickedCountry}
+          attempts={attempts}
+          onAttemptsUpdate={setAttempts}
         />
       </div>
     </div>

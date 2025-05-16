@@ -7,11 +7,15 @@ export default function GeoJsonLayer({
   onCountryClick,
   onScoreUpdate,
   highlightedCountry,
+  attempts,
+  onAttemptsUpdate,
 }: {
   geoData: any;
   onCountryClick?: (country: any) => void;
   onScoreUpdate?: (newScore: number) => void; // Nova prop para atualizar o score
   highlightedCountry?: string | null; // Adiciona prop para país destacado
+  attempts: number; // Recebe as tentativas do componente pai
+  onAttemptsUpdate?: (newAttempts: number) => void; // Função para atualizar as tentativas
 }) {
   const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
@@ -286,7 +290,28 @@ export default function GeoJsonLayer({
         return newScore;
       });
     } else {
-      alert(`Wrong country! Try to find ${gameCountryMap[highlightedCountry] || highlightedCountry}`);
+      // Usar a prop onAttemptsUpdate para atualizar as tentativas no componente pai
+      if (onAttemptsUpdate) {
+        const newAttempts = attempts - 1;
+        onAttemptsUpdate(newAttempts);
+
+        // Verificar se o jogador ficou sem tentativas
+        if (newAttempts <= 0) {
+          // Reset do jogo quando acabar as tentativas
+          setScore(0);
+          if (onScoreUpdate) {
+            onScoreUpdate(0);
+          }
+          alert(`Você esgotou todas as tentativas! O jogo será reiniciado.`);
+          // O componente Questions cuidará de resetar as tentativas para 3
+        } else {
+          alert(
+            `Wrong country! Você perdeu uma tentativa. Restam ${newAttempts} tentativas. Try to find ${
+              gameCountryMap[highlightedCountry as keyof typeof gameCountryMap] || highlightedCountry
+            }`
+          );
+        }
+      }
     }
 
     if (onCountryClick) {
@@ -294,7 +319,7 @@ export default function GeoJsonLayer({
         ...countryFeature,
         properties: {
           ...countryFeature.properties,
-          translatedName: gameCountryMap[countryId] || countryFeature.properties.name,
+          translatedName: gameCountryMap[countryId as keyof typeof gameCountryMap] || countryFeature.properties.name,
           ISO_A2: countryId,
         },
       };
