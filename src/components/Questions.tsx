@@ -238,10 +238,6 @@ export default function Questions({
             <p>Tentativas restantes para completar o desafio: {attempts}</p>
             <p className={scoreAnimating ? "score-animate" : ""}>Corretas: {score}</p>
           </div>
-          <div className="quiz-clicked-country">
-            <h3>País Selecionado:</h3>
-            <p>{clickedCountry || "Nenhum país selecionado"}</p>
-          </div>
           {successMessage && <div className="success-message">{successMessage}</div>}
         </>
       )}
