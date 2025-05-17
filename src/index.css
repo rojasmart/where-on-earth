@@ -120,8 +120,51 @@ button:focus-visible {
   color: #333;
 }
 
+/* Animação para o score */
+@keyframes scoreAnimation {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.5);
+    color: #4caf50;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
 
+.score-animate {
+  animation: scoreAnimation 0.8s ease-in-out;
+}
 
+/* Estilos para mensagens de sucesso */
+.success-message {
+  background-color: rgba(76, 175, 80, 0.9);
+  color: white;
+  padding: 15px 20px;
+  border-radius: 10px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  font-size: 18px;
+  text-align: center;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -60%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
 
 @media (prefers-color-scheme: light) {
   :root {

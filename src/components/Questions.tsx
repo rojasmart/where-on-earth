@@ -83,20 +83,38 @@ export default function Questions({
   registerClickHandler,
   score,
   onClickedCountryChange,
+  onScoreReset,
+  incrementScore,
+  decrementScore,
+  attempts,
+  setAttempts,
 }: {
   registerClickHandler: (handler: (country: any) => void) => void;
   score: number;
-  onClickedCountryChange: (code: string | null) => void; // Add this type
+  onClickedCountryChange: (code: string | null) => void;
+  onScoreReset: () => void;
+  incrementScore: () => void;
+  decrementScore: () => void;
+  attempts: number;
+  setAttempts: (attempts: number) => void;
 }) {
   const [correctCountry, setCorrectCountry] = useState<Country | null>(null);
   const [clickedCountry, setClickedCountry] = useState<string | null>(null);
   const [options, setOptions] = useState<Country[]>([]);
-  const [correctCount, setCorrectCount] = useState(0);
-  const [wrongCount, setWrongCount] = useState(0);
+
   const [gameStage, setGameStage] = useState<"flag" | "map">("flag");
   const [instruction, setInstruction] = useState<string>("");
-
+  const [scoreAnimating, setScoreAnimating] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   useEffect(() => {
+    // Inicialização do jogo - definir tentativas apenas uma vez no início
+    if (typeof setAttempts === "function") {
+      console.log("Inicializando tentativas para 3");
+      setAttempts(3);
+    } else {
+      console.warn("setAttempts não é uma função válida");
+    }
+
     generateQuestion();
   }, []);
 
@@ -111,41 +129,81 @@ export default function Questions({
     setCorrectCountry(correct);
     setOptions(shuffledCountries.slice(0, 3));
     setGameStage("flag");
-    setInstruction("Que país pertence a esta bandeira?");
+    setInstruction("A que país pertence esta bandeira? Tem 3 tentativas para completar o desafio.");
     setClickedCountry(null);
-    onClickedCountryChange(null); // Add this line
+    onClickedCountryChange(null);
+    // Não resetar tentativas a cada nova pergunta, apenas quando o score é zerado
+    // O reset de tentativas acontecerá apenas quando o jogador esgotar todas as tentativas
   };
-
   const handleAnswer = (selectedCountry: Country) => {
     if (gameStage !== "flag") return;
 
     setClickedCountry(selectedCountry.code);
-    onClickedCountryChange(selectedCountry.code); // Add this line
-
+    onClickedCountryChange(selectedCountry.code);
     if (selectedCountry.code === correctCountry?.code) {
       setGameStage("map");
-      setInstruction(`Agora clique no mapa onde fica ${correctCountry.name}`);
+      setSuccessMessage(`Correto! Agora encontre ${correctCountry.name} no mapa.`);
+      setTimeout(() => setSuccessMessage(null), 2000); // Remove message after 2 seconds
+      setInstruction(`Agora clique no mapa onde fica ${correctCountry.name}. Você tem ${attempts} tentativa(s) restante(s).`);
     } else {
-      alert(`Incorreto! A bandeira pertence a ${correctCountry?.name}`);
+      setAttempts((prev) => prev - 1);
+      // Incrementar contador de erros
+
+      // Decrementar o score quando errar na identificação da bandeira
+      decrementScore();
+      if (attempts > 1) {
+        alert(`Incorreto! Você ainda tem ${attempts - 1} tentativas.`);
+      } else {
+        alert(`Você esgotou suas tentativas! A resposta correta era ${correctCountry?.name}`);
+        onScoreReset(); // Zerar o score
+
+        generateQuestion(); // Get new question
+        setAttempts(3); // Reset attempts apenas quando zerar o score
+      }
     }
   };
-
   const onCountryClick = (countryFeature: any) => {
     if (!countryFeature || !countryFeature.properties) return;
     if (gameStage !== "map" || !correctCountry) return;
 
     const clickedIso2 = (countryFeature.properties["ISO3166-1-Alpha-2"] || countryFeature.properties.ISO_A2)?.toUpperCase();
-
     if (clickedIso2 === correctCountry.code) {
-      setCorrectCount((prev) => prev + 1);
-      alert(`Parabéns! Você acertou a localização de ${correctCountry.name}!`);
+      // Incrementar o contador de acertos
+      incrementScore();
 
-      generateQuestion(); // Reseta a pergunta
-      setGameStage("flag");
+      // Mostrar mensagem de sucesso em vez de alert
+      setSuccessMessage(`Parabéns! Você acertou a localização de ${correctCountry.name}!`);
+
+      // Animação do score acontecerá
+      setScoreAnimating(true);
+
+      // Remover mensagem após 2 segundos
+      setTimeout(() => {
+        setSuccessMessage(null);
+        setScoreAnimating(false);
+
+        // Resetar pergunta e voltar para estágio flag
+        generateQuestion();
+        setGameStage("flag");
+      }, 2000);
     } else {
-      setWrongCount((prev) => prev + 1);
+      setAttempts((prev) => prev - 1);
+
+      // Decrementar o score quando errar no mapa
+      decrementScore();
       const clickedName = countryFeature.properties.translatedName || countryFeature.properties.name || clickedIso2;
-      alert(`Incorreto! Você clicou em ${clickedName}, mas a resposta correta é ${correctCountry.name}`);
+
+      if (attempts > 1) {
+        alert(
+          `Incorreto! Você clicou em ${clickedName}, mas a resposta correta é ${correctCountry.name}. Você ainda tem ${attempts - 1} tentativa(s).`
+        );
+      } else {
+        alert(`Você esgotou suas tentativas! A resposta correta era ${correctCountry.name}`);
+        onScoreReset(); // Zerar o score
+
+        generateQuestion(); // Get new question
+        setAttempts(3); // Reset attempts apenas quando zerar o score
+      }
     }
   };
 
@@ -154,7 +212,6 @@ export default function Questions({
       registerClickHandler(onCountryClick);
     }
   }, [correctCountry, gameStage]);
-
   return (
     <div className="quiz-container">
       {correctCountry && (
@@ -165,7 +222,6 @@ export default function Questions({
             className="quiz-flag"
           />
           <p className="quiz-question">{instruction}</p>
-
           {gameStage === "flag" && (
             <div className="quiz-options">
               {options.map((country) => (
@@ -175,13 +231,14 @@ export default function Questions({
               ))}
             </div>
           )}
-
-          {gameStage === "map" && <div className="quiz-map-instruction">Clique no país correto no mapa!</div>}
-
+          {gameStage === "map" && (
+            <div className="quiz-map-instruction">Clique no país correto no mapa! Você tem {attempts} tentativa(s) restante(s).</div>
+          )}{" "}
           <div className="quiz-score">
-            <p>Corretas: {score}</p>
-            <p>Erradas: {wrongCount}</p>
+            <p>Tentativas restantes para completar o desafio: {attempts}</p>
+            <p className={scoreAnimating ? "score-animate" : ""}>Corretas: {score}</p>
           </div>
+          {successMessage && <div className="success-message">{successMessage}</div>}
         </>
       )}
     </div>

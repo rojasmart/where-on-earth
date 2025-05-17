@@ -2,26 +2,27 @@ import { useMemo, useState, useEffect } from "react";
 import { Line } from "@react-three/drei";
 import * as THREE from "three";
 
+// Definindo uma interface para o mapa de países
+interface CountryMap {
+  [key: string]: string;
+}
+
 export default function GeoJsonLayer({
   geoData,
   onCountryClick,
   onScoreUpdate,
   highlightedCountry,
-  attempts,
-  onAttemptsUpdate,
 }: {
   geoData: any;
   onCountryClick?: (country: any) => void;
-  onScoreUpdate?: (newScore: number) => void; // Nova prop para atualizar o score
-  highlightedCountry?: string | null; // Adiciona prop para país destacado
-  attempts: number; // Recebe as tentativas do componente pai
-  onAttemptsUpdate?: (newAttempts: number) => void; // Função para atualizar as tentativas
+  onScoreUpdate?: (newScore: number) => void;
+  highlightedCountry?: string | null;
 }) {
   const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
-  const [score, setScore] = useState(0);
+  const [, setScore] = useState(0); // Não usamos o valor diretamente
 
-  const gameCountryMap = {
+  const gameCountryMap: CountryMap = {
     FR: "França",
     BR: "Brasil",
     US: "Estados Unidos",
@@ -76,20 +77,14 @@ export default function GeoJsonLayer({
       return;
     }
 
-    if (process.env.NODE_ENV === "development") {
-      console.log("GeoData features loaded:", geoData.features.length);
-    }
+    console.log("GeoData features loaded:", geoData.features.length);
   }, [geoData]);
 
   const countries = useMemo(() => {
     if (!geoData || !geoData.features) return [];
 
     // Primeiro, filtra features inválidas
-    const validFeatures = geoData.features.filter((feature) => feature?.geometry?.coordinates);
-
-    if (process.env.NODE_ENV === "development" && validFeatures.length < geoData.features.length) {
-      console.warn(`Filtered ${geoData.features.length - validFeatures.length} invalid features`);
-    }
+    const validFeatures = geoData.features.filter((feature: any) => feature?.geometry?.coordinates);
 
     // Log único de resumo em vez de múltiplos avisos
     if (validFeatures.length < geoData.features.length) {
@@ -111,8 +106,8 @@ export default function GeoJsonLayer({
         }
 
         const coordinates = feature.geometry.coordinates;
-        let lines = [];
-        let surfaces = [];
+        let lines: any[] = [];
+        let surfaces: any[] = [];
 
         try {
           if (feature.geometry.type === "Polygon") {
@@ -243,7 +238,7 @@ export default function GeoJsonLayer({
 
         return { id: countryId, lines, surfaces };
       })
-      .filter((country) => country.id); // Remove countries without valid IDs
+      .filter((country: any) => country.id); // Remove countries without valid IDs
 
     console.log("Processed countries:", mappedCountries.length);
 
@@ -266,7 +261,7 @@ export default function GeoJsonLayer({
 
     setSelectedCountry(countryId);
 
-    const countryFeature = geoData.features.find((feature) => {
+    const countryFeature = geoData.features.find((feature: any) => {
       if (!feature?.properties) return false;
 
       const featureIso2 = (feature.properties["ISO3166-1-Alpha-2"] || feature.properties.ISO_A2)?.toUpperCase();
@@ -279,8 +274,21 @@ export default function GeoJsonLayer({
       return;
     }
 
-    //HighlightedCountry is the same as CountryId
-
+    // Sempre chama onCountryClick para processar a lógica tanto de acerto quanto de erro
+    if (onCountryClick) {
+      const enhancedFeature = {
+        ...countryFeature,
+        properties: {
+          ...countryFeature.properties,
+          translatedName: gameCountryMap[countryId as keyof CountryMap] || countryFeature.properties.name,
+          ISO_A2: countryId,
+        },
+      };
+      
+      onCountryClick(enhancedFeature);
+    }
+    
+    // Atualiza o score apenas se acertar (esse trecho gerencia apenas o incremento visual no GeoJsonLayer)
     if (highlightedCountry === countryId) {
       setScore((prevScore) => {
         const newScore = prevScore + 1;
@@ -289,84 +297,27 @@ export default function GeoJsonLayer({
         }
         return newScore;
       });
-    } else {
-      // Usar a prop onAttemptsUpdate para atualizar as tentativas no componente pai
-      if (onAttemptsUpdate) {
-        const newAttempts = attempts - 1;
-        onAttemptsUpdate(newAttempts);
-
-        // Verificar se o jogador ficou sem tentativas
-        if (newAttempts <= 0) {
-          // Reset do jogo quando acabar as tentativas
-          setScore(0);
-          if (onScoreUpdate) {
-            onScoreUpdate(0);
-          }
-          alert(`Você esgotou todas as tentativas! O jogo será reiniciado.`);
-          // O componente Questions cuidará de resetar as tentativas para 3
-        } else {
-          alert(
-            `Wrong country! Você perdeu uma tentativa. Restam ${newAttempts} tentativas. Try to find ${
-              gameCountryMap[highlightedCountry as keyof typeof gameCountryMap] || highlightedCountry
-            }`
-          );
-        }
-      }
-    }
-
-    if (onCountryClick) {
-      const enhancedFeature = {
-        ...countryFeature,
-        properties: {
-          ...countryFeature.properties,
-          translatedName: gameCountryMap[countryId as keyof typeof gameCountryMap] || countryFeature.properties.name,
-          ISO_A2: countryId,
-        },
-      };
-
-      onCountryClick(enhancedFeature);
     }
   };
 
+  // Simplificado para evitar problemas com bufferAttribute
   return (
     <>
       {countries.length > 0 ? (
         <>
-          {/* Render country fill areas (invisible but interactive) */}
-          {countries.map((country) =>
-            country.id && country.surfaces.length > 0
-              ? country.surfaces.map((vertices, i) => (
-                  <mesh
-                    key={`surface-${country.id}-${i}`}
-                    onPointerOver={() => handlePointerOver(country.id)}
-                    onPointerOut={handlePointerOut}
-                    onClick={() => handleCountryClick(country.id)}
-                    renderOrder={selectedCountry === country.id ? 1 : 0}
-                  >
-                    <bufferGeometry>
-                      <bufferAttribute
-                        attach="attributes-position"
-                        array={new Float32Array(vertices.flatMap((v) => [v.x, v.y, v.z]))}
-                        count={vertices.length}
-                        itemSize={3}
-                      />
-                    </bufferGeometry>
-                    <meshBasicMaterial transparent opacity={0.0} side={THREE.DoubleSide} />
-                  </mesh>
-                ))
-              : null
-          )}
-
-          {/* Render country borders */}
-          {countries.map((country) =>
+          {/* Render only country borders instead of using problematic bufferAttributes */}
+          {countries.map((country: any) =>
             country.id && country.lines.length > 0
-              ? country.lines.map((points, i) => (
+              ? country.lines.map((points: any, i: number) => (
                   <Line
                     key={`line-${country.id}-${i}`}
                     points={points}
                     color={selectedCountry === country.id ? "red" : hoveredCountry === country.id ? "#ff8888" : "white"}
                     lineWidth={selectedCountry === country.id ? 3 : hoveredCountry === country.id ? 2 : 1}
                     renderOrder={selectedCountry === country.id ? 2 : 1}
+                    onClick={() => handleCountryClick(country.id)}
+                    onPointerOver={() => handlePointerOver(country.id)}
+                    onPointerOut={handlePointerOut}
                   />
                 ))
               : null
