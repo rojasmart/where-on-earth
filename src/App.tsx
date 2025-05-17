@@ -28,8 +28,8 @@ function App() {
     setScore((prevScore) => Math.max(0, prevScore - 1)); // Não permitir score negativo
   };
   return (
-    <div style={styles.container}>
-      <div style={styles.leftPanel}>
+    <div className="container">
+      <div className="left-panel">
         <Questions
           registerClickHandler={registerCountryClickHandler}
           score={score}
@@ -40,8 +40,8 @@ function App() {
           attempts={attempts}
           setAttempts={setAttempts} // Certifique-se que isso está presente
         />
-      </div>{" "}
-      <div style={styles.rightPanel}>
+      </div>
+      <div className="right-panel">
         <Globe
           pinCoordinates={pinCoordinates}
           onCountryClick={onCountryClickHandler ?? undefined}
@@ -54,30 +54,5 @@ function App() {
     </div>
   );
 }
-
-const styles = {
-  container: {
-    display: "flex",
-    flexDirection: "row" as const,
-    height: "100vh",
-    width: "100vw",
-  },
-  leftPanel: {
-    flex: 1,
-    backgroundColor: "#f4f4f4",
-    padding: "20px",
-    overflowY: "auto" as const,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  rightPanel: {
-    flex: 2,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#000",
-  },
-};
 
 export default App;

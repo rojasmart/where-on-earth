@@ -279,6 +279,7 @@ export default function Questions({
       registerClickHandler(onCountryClick);
     }
   }, [correctCountry, gameStage]);
+
   return (
     <div className="quiz-container">
       {correctCountry && (

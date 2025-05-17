@@ -120,6 +120,31 @@ button:focus-visible {
   color: #333;
 }
 
+.rightPanel {
+    flex: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #000;
+}
+
+.leftPanel {
+    flex: 1;
+    background-color: #f4f4f4;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.container {
+    display: flex;
+    flex-direction: row;
+    height: 100vh;
+    width: 100vw;
+}
+
 /* Animação para o score */
 @keyframes scoreAnimation {
   0% {
