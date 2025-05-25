@@ -163,7 +163,7 @@ export default function Questions({
   incrementScore: () => void;
   decrementScore: () => void;
   attempts: number;
-  setAttempts: (attempts: number) => void;
+  setAttempts: (attempts: number | ((prev: number) => number)) => void; // Fix is here
 }) {
   const [correctCountry, setCorrectCountry] = useState<Country | null>(null);
 
