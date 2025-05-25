@@ -3,7 +3,7 @@ import Globe from "./components/Globe";
 import Questions from "./components/Questions";
 
 function App() {
-  const [pinCoordinates, setPinCoordinates] = useState<[number, number] | null>(null);
+  const [pinCoordinates] = useState<[number, number] | null>(null);
   const [onCountryClickHandler, setOnCountryClickHandler] = useState<((country: any) => void) | null>(null);
   const [score, setScore] = useState(0);
   const [clickedCountry, setClickedCountry] = useState<string | null>(null);
