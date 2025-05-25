@@ -212,7 +212,7 @@ export default function Questions({
       setTimeout(() => setSuccessMessage(null), 2000); // Remove message after 2 seconds
       setInstruction(`Agora clique no mapa onde fica ${correctCountry.name}. Você tem ${attempts} tentativa(s) restante(s).`);
     } else {
-      setAttempts((prev) => prev - 1);
+      setAttempts((prev: number) => prev - 1);
       // Incrementar contador de erros
 
       // Decrementar o score quando errar na identificação da bandeira
@@ -253,7 +253,7 @@ export default function Questions({
         setGameStage("flag");
       }, 2000);
     } else {
-      setAttempts((prev) => prev - 1);
+      setAttempts((prev: number) => prev - 1);
 
       // Decrementar o score quando errar no mapa
       decrementScore();
