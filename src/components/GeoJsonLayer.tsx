@@ -2,6 +2,26 @@ import { useMemo, useState, useEffect } from "react";
 import { Line } from "@react-three/drei";
 import * as THREE from "three";
 
+// Define interfaces for better type safety
+interface CountryFeature {
+  id: string | null;
+  lines: THREE.Vector3[][];
+  surfaces: THREE.Vector3[][];
+}
+
+interface GeoFeature {
+  properties: {
+    [key: string]: any;
+    name?: string;
+    "ISO3166-1-Alpha-2"?: string;
+    ISO_A2?: string;
+  };
+  geometry?: {
+    type: string;
+    coordinates: any[];
+  };
+}
+
 export default function GeoJsonLayer({
   geoData,
   onCountryClick,
@@ -10,7 +30,7 @@ export default function GeoJsonLayer({
   attempts,
   onAttemptsUpdate,
 }: {
-  geoData: any;
+  geoData: { features: GeoFeature[] };
   onCountryClick?: (country: any) => void;
   onScoreUpdate?: (newScore: number) => void; // Nova prop para atualizar o score
   highlightedCountry?: string | null; // Adiciona prop para país destacado
@@ -19,7 +39,7 @@ export default function GeoJsonLayer({
 }) {
   const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
-  const [score, setScore] = useState(0);
+  const [score, _] = useState(0); // Use underscore to indicate intentional non-use
 
   const gameCountryMap = {
     FR: "França",
@@ -85,7 +105,7 @@ export default function GeoJsonLayer({
     if (!geoData || !geoData.features) return [];
 
     // Primeiro, filtra features inválidas
-    const validFeatures = geoData.features.filter((feature) => feature?.geometry?.coordinates);
+    const validFeatures = geoData.features.filter((feature: GeoFeature) => feature?.geometry?.coordinates);
 
     if (process.env.NODE_ENV === "development" && validFeatures.length < geoData.features.length) {
       console.warn(`Filtered ${geoData.features.length - validFeatures.length} invalid features`);
@@ -96,7 +116,7 @@ export default function GeoJsonLayer({
       console.warn(`Filtered out ${geoData.features.length - validFeatures.length} invalid features from GeoJSON`);
     }
 
-    const mappedCountries = geoData.features
+    const mappedCountries: CountryFeature[] = geoData.features
       .map((feature: any) => {
         // Guard against missing or malformed geometry
         if (!feature?.properties || !feature.geometry?.coordinates) {
@@ -111,13 +131,13 @@ export default function GeoJsonLayer({
         }
 
         const coordinates = feature.geometry.coordinates;
-        let lines = [];
-        let surfaces = [];
+        let lines: THREE.Vector3[][] = [];
+        let surfaces: THREE.Vector3[][] = [];
 
         try {
           if (feature.geometry.type === "Polygon") {
             // Process polygon lines
-            lines = coordinates.map((ring: any) =>
+            lines = coordinates.map((ring: [number, number][]) =>
               ring.map(([lon, lat]: [number, number]) => {
                 const phi = lat * (Math.PI / 180);
                 const theta = -lon * (Math.PI / 180);
@@ -129,7 +149,7 @@ export default function GeoJsonLayer({
             );
 
             // Create surface triangles for each ring
-            coordinates.forEach((ring: any) => {
+            coordinates.forEach((ring: [number, number][]) => {
               if (ring.length < 3) return; // Skip if not enough points for triangulation
 
               // Create a center point (average of all vertices)
@@ -143,7 +163,7 @@ export default function GeoJsonLayer({
               center[1] /= ring.length;
 
               // Create triangles using center point (fan triangulation)
-              const vertices = [];
+              const vertices: THREE.Vector3[] = [];
               for (let i = 0; i < ring.length; i++) {
                 // Current point
                 const [lon1, lat1] = ring[i];
@@ -175,8 +195,8 @@ export default function GeoJsonLayer({
             });
           } else if (feature.geometry.type === "MultiPolygon") {
             // Process multipolygon lines
-            lines = coordinates.flatMap((polygon: any) =>
-              polygon.map((ring: any) =>
+            lines = coordinates.flatMap((polygon: [number, number][][]) =>
+              polygon.map((ring: [number, number][]) =>
                 ring.map(([lon, lat]: [number, number]) => {
                   const phi = lat * (Math.PI / 180);
                   const theta = -lon * (Math.PI / 180);
@@ -189,8 +209,8 @@ export default function GeoJsonLayer({
             );
 
             // Create surface triangles for each ring in each polygon
-            coordinates.forEach((polygon: any) => {
-              polygon.forEach((ring: any) => {
+            coordinates.forEach((polygon: [number, number][][]) => {
+              polygon.forEach((ring: [number, number][]) => {
                 if (ring.length < 3) return; // Skip if not enough points
 
                 // Create a center point (average of all vertices)
@@ -204,7 +224,7 @@ export default function GeoJsonLayer({
                 center[1] /= ring.length;
 
                 // Create triangles using center point (fan triangulation)
-                const vertices = [];
+                const vertices: THREE.Vector3[] = [];
                 for (let i = 0; i < ring.length; i++) {
                   // Current point
                   const [lon1, lat1] = ring[i];
@@ -243,9 +263,7 @@ export default function GeoJsonLayer({
 
         return { id: countryId, lines, surfaces };
       })
-      .filter((country) => country.id); // Remove countries without valid IDs
-
-    console.log("Processed countries:", mappedCountries.length);
+      .filter((country): country is CountryFeature & { id: string } => !!country.id); // Remove countries without valid IDs with type guard
 
     return mappedCountries;
   }, [geoData]);
@@ -266,7 +284,7 @@ export default function GeoJsonLayer({
 
     setSelectedCountry(countryId);
 
-    const countryFeature = geoData.features.find((feature) => {
+    const countryFeature = geoData.features.find((feature: GeoFeature) => {
       if (!feature?.properties) return false;
 
       const featureIso2 = (feature.properties["ISO3166-1-Alpha-2"] || feature.properties.ISO_A2)?.toUpperCase();
@@ -333,9 +351,9 @@ export default function GeoJsonLayer({
       {countries.length > 0 ? (
         <>
           {/* Render country fill areas (invisible but interactive) */}
-          {countries.map((country) =>
+          {countries.map((country: CountryFeature) =>
             country.id && country.surfaces.length > 0
-              ? country.surfaces.map((vertices, i) => (
+              ? country.surfaces.map((vertices: THREE.Vector3[], i: number) => (
                   <mesh
                     key={`surface-${country.id}-${i}`}
                     onPointerOver={() => handlePointerOver(country.id)}
@@ -358,9 +376,9 @@ export default function GeoJsonLayer({
           )}
 
           {/* Render country borders */}
-          {countries.map((country) =>
+          {countries.map((country: CountryFeature) =>
             country.id && country.lines.length > 0
-              ? country.lines.map((points, i) => (
+              ? country.lines.map((points: THREE.Vector3[], i: number) => (
                   <Line
                     key={`line-${country.id}-${i}`}
                     points={points}
