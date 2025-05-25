@@ -166,7 +166,7 @@ export default function Questions({
   setAttempts: (attempts: number) => void;
 }) {
   const [correctCountry, setCorrectCountry] = useState<Country | null>(null);
-  const [clickedCountry, setClickedCountry] = useState<string | null>(null);
+
   const [options, setOptions] = useState<Country[]>([]);
 
   const [gameStage, setGameStage] = useState<"flag" | "map">("flag");
@@ -197,7 +197,7 @@ export default function Questions({
     setOptions(shuffledCountries.slice(0, 3));
     setGameStage("flag");
     setInstruction("A que país pertence esta bandeira? Tem 3 tentativas para completar o desafio.");
-    setClickedCountry(null);
+
     onClickedCountryChange(null);
     // Não resetar tentativas a cada nova pergunta, apenas quando o score é zerado
     // O reset de tentativas acontecerá apenas quando o jogador esgotar todas as tentativas
@@ -205,7 +205,6 @@ export default function Questions({
   const handleAnswer = (selectedCountry: Country) => {
     if (gameStage !== "flag") return;
 
-    setClickedCountry(selectedCountry.code);
     onClickedCountryChange(selectedCountry.code);
     if (selectedCountry.code === correctCountry?.code) {
       setGameStage("map");
