@@ -13,10 +13,15 @@ function App() {
   const registerCountryClickHandler = (handler: (country: any) => void) => {
     setOnCountryClickHandler(handler);
   };
-
   // Função para atualizar o score
-  const onScoreUpdate = (newScore: number) => {
-    setScore(newScore); // Atualiza o estado do score
+  const onScoreUpdate = (scoreChange: number) => {
+    if (scoreChange === 0) {
+      // Se for 0, reseta o score
+      setScore(0);
+    } else {
+      // Se for outro valor, incrementa o score atual
+      setScore((prevScore) => prevScore + scoreChange);
+    }
   };
   // Função para incrementar o score
   const incrementScore = () => {

@@ -39,7 +39,7 @@ export default function GeoJsonLayer({
 }) {
   const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
-  const [score, _] = useState(0); // Use underscore to indicate intentional non-use
+  // Não mantemos o estado do score no GeoJsonLayer, apenas usamos o onScoreUpdate para comunicar mudanças
 
   const gameCountryMap = {
     FR: "França",
@@ -297,28 +297,25 @@ export default function GeoJsonLayer({
       return;
     }
 
-    //HighlightedCountry is the same as CountryId
-
+    // Verifica se o país clicado é o mesmo que o país destacado
     if (highlightedCountry === countryId) {
-      setScore((prevScore) => {
-        const newScore = prevScore + 1;
-        if (onScoreUpdate) {
-          onScoreUpdate(newScore);
-        }
-        return newScore;
-      });
+      // Quando acertamos no mapa, incrementamos a pontuação e notificamos o onCountryClick
+      console.log(`País correto clicado: ${countryId}`);
+
+      // Incrementar a pontuação diretamente aqui
+      if (onScoreUpdate) {
+        // Incrementamos o score atual +1
+        onScoreUpdate(1); // Isso sinaliza ao componente pai que deve incrementar o score
+      }
     } else {
       // Usar a prop onAttemptsUpdate para atualizar as tentativas no componente pai
       if (onAttemptsUpdate) {
         const newAttempts = attempts - 1;
-        onAttemptsUpdate(newAttempts);
-
-        // Verificar se o jogador ficou sem tentativas
+        onAttemptsUpdate(newAttempts); // Verificar se o jogador ficou sem tentativas
         if (newAttempts <= 0) {
           // Reset do jogo quando acabar as tentativas
-          setScore(0);
           if (onScoreUpdate) {
-            onScoreUpdate(0);
+            onScoreUpdate(0); // Reset o score para 0 através da prop onScoreUpdate
           }
           alert(`Você esgotou todas as tentativas! O jogo será reiniciado.`);
           // O componente Questions cuidará de resetar as tentativas para 3
@@ -350,23 +347,24 @@ export default function GeoJsonLayer({
     <>
       {countries.length > 0 ? (
         <>
-          {/* Render country fill areas (invisible but interactive) */}
+          {/* Render country fill areas (invisible but interactive) */}{" "}
           {countries.map((country: CountryFeature) =>
             country.id && country.surfaces.length > 0
               ? country.surfaces.map((vertices: THREE.Vector3[], i: number) => (
                   <mesh
                     key={`surface-${country.id}-${i}`}
-                    onPointerOver={() => handlePointerOver(country.id)}
+                    onPointerOver={() => handlePointerOver(country.id as string)}
                     onPointerOut={handlePointerOut}
-                    onClick={() => handleCountryClick(country.id)}
+                    onClick={() => handleCountryClick(country.id as string)}
                     renderOrder={selectedCountry === country.id ? 1 : 0}
                   >
                     <bufferGeometry>
                       <bufferAttribute
                         attach="attributes-position"
-                        array={new Float32Array(vertices.flatMap((v) => [v.x, v.y, v.z]))}
+                        array={new Float32Array(vertices.flatMap((v: THREE.Vector3) => [v.x, v.y, v.z]))}
                         count={vertices.length}
                         itemSize={3}
+                        args={[new Float32Array(vertices.flatMap((v: THREE.Vector3) => [v.x, v.y, v.z])), 3]}
                       />
                     </bufferGeometry>
                     <meshBasicMaterial transparent opacity={0.0} side={THREE.DoubleSide} />
@@ -374,7 +372,6 @@ export default function GeoJsonLayer({
                 ))
               : null
           )}
-
           {/* Render country borders */}
           {countries.map((country: CountryFeature) =>
             country.id && country.lines.length > 0
